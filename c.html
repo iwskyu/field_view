@@ -3,276 +3,361 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Ride View</title>
+<title>Ride View4</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100vw;height:50vh;overflow:hidden;font-family:sans-serif;color:#fff;}
-
-/* アニメーション背景 */
-@keyframes bgmove{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-body{
-  background:linear-gradient(135deg,#0d1b2a,#1b2838,#0a1628,#162032,#0d1b2a);
-  background-size:400% 400%;
-  animation:bgmove 8s ease infinite;
-}
+html,body{width:100vw;height:50vh;overflow:hidden;font-family:sans-serif;color:#fff;font-weight:700;}
+@keyframes bgmove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+body{background:linear-gradient(135deg,#0d1b2a,#1a2e4a,#0a1f3a,#0e2540,#0d1b2a);background-size:400% 400%;animation:bgmove 10s ease infinite;}
 
 /* 権限画面 */
-#perm{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:200;background:rgba(0,0,0,.7);}
-#perm .logo{font-size:44px;}
-#perm h1{font-size:24px;font-weight:700;letter-spacing:2px;}
-#perm p{font-size:13px;color:#aaa;text-align:center;max-width:260px;line-height:1.7;}
-#startBtn{font-size:17px;background:linear-gradient(135deg,#1a7a3a,#0f9a4a);border:none;color:#fff;padding:13px 38px;border-radius:30px;cursor:pointer;font-weight:700;box-shadow:0 0 20px #0f9a4a55;}
-#startBtn:active{transform:scale(.96);}
-#permErr{color:#f66;font-size:12px;display:none;text-align:center;}
+#perm{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:300;background:rgba(0,0,0,.8);}
+#perm .logo{font-size:40px;}
+#perm h1{font-size:22px;letter-spacing:2px;}
+#perm p{font-size:12px;color:#bbb;text-align:center;max-width:260px;line-height:1.7;}
+#startBtn{font-size:16px;background:linear-gradient(135deg,#1a8a3a,#0fa04a);border:none;color:#fff;padding:12px 36px;border-radius:28px;cursor:pointer;font-weight:700;}
+#startBtn:active{transform:scale(.95);}
+#permErr{color:#f66;font-size:11px;display:none;text-align:center;max-width:260px;}
 
 /* メイン */
-#main{display:none;width:100vw;height:50vh;flex-direction:column;gap:2px;padding:2px;}
+#main{display:none;width:100vw;height:50vh;flex-direction:column;gap:1px;padding:2px;}
 
-.row{display:flex;gap:2px;width:100%;}
-.card{
-  background:rgba(255,255,255,.07);
-  backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:7px;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:3px 4px;flex:1;min-width:0;overflow:hidden;
-  position:relative;
-}
-.ico{font-size:14px;line-height:1;}
-.val{font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;}
-.sm{font-size:9px;color:#aaa;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
-.big{font-size:20px;font-weight:700;line-height:1;}
+/* ツールバー */
+#toolbar{display:flex;align-items:center;gap:4px;height:22px;flex-shrink:0;}
+#toolbar .tbtn{font-size:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:2px 7px;cursor:pointer;font-weight:700;white-space:nowrap;}
+#toolbar .tbtn.eco-on{background:rgba(80,200,100,.35);border-color:#5c8;}
+#clock-bar{font-size:15px;font-weight:700;margin-right:auto;letter-spacing:1px;}
 
-/* カウントダウンバッジ */
-.cdwn{position:absolute;top:2px;right:3px;font-size:8px;color:#5af;opacity:.8;font-weight:700;}
+/* カードグリッド */
+#grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:1px;min-height:0;}
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 3px;position:relative;overflow:hidden;cursor:pointer;min-width:0;min-height:0;}
+.card.hidden .card-body{display:none;}
+.card.hidden{opacity:.35;}
+.card-ico{font-size:13px;line-height:1;flex-shrink:0;}
+.card-val{font-size:13px;font-weight:700;line-height:1.15;white-space:nowrap;text-align:center;}
+.card-sub{font-size:9px;color:#9cf;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.card-body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:100%;}
+.cdwn{position:absolute;top:1px;right:2px;font-size:7px;color:#7af;font-weight:700;opacity:.85;}
 
 /* コンパス */
-.cring{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cring{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);position:relative;display:flex;align-items:center;justify-content:center;}
 .clb{position:absolute;font-size:7px;font-weight:700;}
 .cl-n{top:0;left:50%;transform:translateX(-50%);color:#f55;}
 .cl-s{bottom:0;left:50%;transform:translateX(-50%);}
-.cl-e{right:1px;top:50%;transform:translateY(-50%);}
-.cl-w{left:1px;top:50%;transform:translateY(-50%);}
-#ndl-n{position:absolute;top:50%;left:50%;width:2px;height:15px;margin:-15px -1px 0;background:#f55;border-radius:1px 1px 0 0;transform-origin:bottom center;transition:transform .3s;}
-#ndl-s{position:absolute;top:50%;left:50%;width:2px;height:15px;margin:0 -1px;background:#555;border-radius:0 0 1px 1px;transform-origin:top center;transition:transform .3s;}
+.cl-e{right:0;top:50%;transform:translateY(-50%);}
+.cl-w{left:0;top:50%;transform:translateY(-50%);}
+#ndl-n{position:absolute;top:50%;left:50%;width:2px;height:13px;margin:-13px -1px 0;background:#f55;border-radius:1px 1px 0 0;transform-origin:bottom center;transition:transform .4s;}
+#ndl-s{position:absolute;top:50%;left:50%;width:2px;height:13px;margin:0 -1px;background:#555;border-radius:0 0 1px 1px;transform-origin:top center;transition:transform .4s;}
 .cdot{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;top:50%;left:50%;margin:-2px 0 0 -2px;}
 
-/* POI */
+/* POIカード (span2) */
+.span2{grid-column:span 2;}
 .poi-blk{width:100%;display:flex;flex-direction:column;gap:0;}
-.poi-row{display:flex;align-items:flex-start;gap:2px;width:100%;border-bottom:1px solid rgba(255,255,255,.08);padding:2px 0;}
+.poi-row{display:flex;align-items:baseline;gap:2px;width:100%;border-bottom:1px solid rgba(255,255,255,.07);padding:1px 0;}
 .poi-row:last-child{border-bottom:none;}
-.pio{font-size:11px;flex-shrink:0;margin-top:1px;}
+.pio{font-size:10px;flex-shrink:0;}
 .ptxt{flex:1;min-width:0;}
-.pn{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pd{font-size:9px;color:#9cf;}
+.pn{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pd{font-size:9px;color:#9cf;white-space:nowrap;}
 
-/* 住所 */
-.addr-txt{font-size:10px;font-weight:600;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+/* 住所カード (span4) */
+.span4{grid-column:span 4;}
+.addr-inner{display:flex;gap:4px;align-items:baseline;flex-wrap:nowrap;width:100%;overflow:hidden;}
+.addr-inner span{font-size:10px;font-weight:700;white-space:nowrap;}
+.addr-inner .dim{color:#9cf;font-size:9px;}
 </style>
 </head>
 <body>
 
-<!-- 権限取得画面 -->
+<!-- 権限画面 -->
 <div id="perm">
   <div class="logo">🏍️</div>
-  <h1>Ride View</h1>
-  <p>位置情報・センサーの使用許可が必要です。ボタンを押してスタートしてください。</p>
+  <h1>Ride View4</h1>
+  <p>位置情報・センサーへのアクセス許可が必要です。ボタンを押してスタートしてください。</p>
   <button id="startBtn" onclick="startApp()">🚀 スタート</button>
   <div id="permErr"></div>
 </div>
 
 <!-- メイン画面 -->
 <div id="main">
+  <!-- ツールバー -->
+  <div id="toolbar">
+    <div id="clock-bar">🕐 --:--:--</div>
+    <button class="tbtn" id="ecoBtn" onclick="toggleEco()">🔋 省電力</button>
+    <button class="tbtn" onclick="resetDist()">🛣️ リセット</button>
+  </div>
 
-  <!-- Row1: 天気 / 日の出日没 / コンパス / 標高 -->
-  <div class="row" style="flex:2.4;">
-    <!-- 天気 -->
-    <div class="card" style="flex:1.05;">
+  <!-- カードグリッド 4列×3行 -->
+  <div id="grid">
+
+    <!-- 天気 (1) -->
+    <div class="card" id="c-wx" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-wx"></div>
-      <div class="ico" id="wico">🌡️</div>
-      <div class="val" id="wtemp">--°</div>
-      <div class="sm" id="wdesc">--</div>
-      <div class="sm" id="wrain">💧--%</div>
+      <div class="card-body">
+        <div class="card-ico" id="wico">🌡️</div>
+        <div class="card-val" id="wtemp">--°</div>
+        <div class="card-sub" id="wrain">💧--%</div>
+      </div>
     </div>
-    <!-- 日の出日没 -->
-    <div class="card" style="flex:1.35;">
+
+    <!-- 風・湿度 (2) -->
+    <div class="card" id="c-wind" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-wind"></div>
+      <div class="card-body">
+        <div class="card-val" id="wind">💨--</div>
+        <div class="card-sub" id="humid">💧湿度--%</div>
+        <div class="card-sub" id="pressure">🌀--hPa</div>
+      </div>
+    </div>
+
+    <!-- 波・月 (3) -->
+    <div class="card" id="c-wave" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-wave"></div>
+      <div class="card-body">
+        <div class="card-val" id="wave">🌊--m</div>
+        <div class="card-sub" id="moon">🌕--</div>
+      </div>
+    </div>
+
+    <!-- 日の出日没 (4) -->
+    <div class="card" id="c-sun" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-sun"></div>
-      <div style="display:flex;gap:6px;">
-        <div style="text-align:center;">
-          <div class="ico">🌅</div>
-          <div class="val" id="sr">--:--</div>
-          <div class="sm">東</div>
-        </div>
-        <div style="text-align:center;">
-          <div class="ico">🌇</div>
-          <div class="val" id="ss">--:--</div>
-          <div class="sm">西</div>
+      <div class="card-body">
+        <div style="display:flex;gap:4px;">
+          <div style="text-align:center;">
+            <div class="card-ico">🌅</div>
+            <div class="card-val" id="sr">--:--</div>
+            <div class="card-sub" id="srd">↗東</div>
+          </div>
+          <div style="text-align:center;">
+            <div class="card-ico">🌇</div>
+            <div class="card-val" id="ss">--:--</div>
+            <div class="card-sub" id="ssd">↖西</div>
+          </div>
         </div>
       </div>
     </div>
-    <!-- コンパス -->
-    <div class="card" style="flex:1;">
+
+    <!-- コンパス (5) -->
+    <div class="card" id="c-hdg" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-hdg"></div>
-      <div class="cring">
-        <span class="clb cl-n">N</span><span class="clb cl-s">S</span>
-        <span class="clb cl-e">E</span><span class="clb cl-w">W</span>
-        <div id="ndl-n"></div><div id="ndl-s"></div>
-        <div class="cdot"></div>
+      <div class="card-body">
+        <div class="cring">
+          <span class="clb cl-n">N</span><span class="clb cl-s">S</span>
+          <span class="clb cl-e">E</span><span class="clb cl-w">W</span>
+          <div id="ndl-n"></div><div id="ndl-s"></div>
+          <div class="cdot"></div>
+        </div>
+        <div class="card-sub" id="hdg">--</div>
       </div>
-      <div class="sm" id="hdg">--</div>
     </div>
-    <!-- 標高 -->
-    <div class="card" style="flex:0.9;">
+
+    <!-- 標高 (6) -->
+    <div class="card" id="c-elv" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-elv"></div>
-      <div class="ico">⛰️</div>
-      <div class="val" id="elev">--m</div>
-      <div class="sm" id="coords">--</div>
+      <div class="card-body">
+        <div class="card-ico">⛰️</div>
+        <div class="card-val" id="elev">--m</div>
+        <div class="card-sub" id="coords">--</div>
+      </div>
     </div>
-  </div>
 
-  <!-- Row2: 住所 / 速度 / 走行距離 / GPS精度 -->
-  <div class="row" style="flex:1.5;">
-    <div class="card" style="flex:2.3;flex-direction:row;gap:3px;justify-content:flex-start;">
-      <div class="cdwn" id="cd-addr"></div>
-      <span style="font-size:12px;flex-shrink:0;">📍</span>
-      <div class="addr-txt" id="addr">--</div>
-    </div>
-    <div class="card" style="flex:.85;">
+    <!-- 速度 (7) -->
+    <div class="card" id="c-spd" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-spd"></div>
-      <div class="big" id="spd">0</div>
-      <div class="sm">km/h</div>
+      <div class="card-body">
+        <div style="font-size:20px;font-weight:700;line-height:1;" id="spd">0</div>
+        <div class="card-sub">km/h</div>
+      </div>
     </div>
-    <div class="card" style="flex:.85;">
+
+    <!-- 走行距離+GPS精度 (8) -->
+    <div class="card" id="c-dst" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-dst"></div>
-      <div class="ico">🛣️</div>
-      <div class="val" id="dist">0.0</div>
-      <div class="sm">km</div>
+      <div class="card-body">
+        <div class="card-ico">🛣️</div>
+        <div class="card-val" id="dist">0.0km</div>
+        <div class="card-sub" id="acc">📡--m</div>
+      </div>
     </div>
-    <div class="card" style="flex:.7;">
-      <div class="cdwn" id="cd-acc"></div>
-      <div class="ico">📡</div>
-      <div class="val" id="acc">--</div>
-      <div class="sm">m</div>
-    </div>
-  </div>
 
-  <!-- Row3: POI -->
-  <div class="row" style="flex:3;">
-    <div class="card">
+    <!-- 住所 (span4, row3 col1-4) -->
+    <div class="card span4" id="c-addr" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-addr"></div>
+      <div class="card-body" style="flex-direction:row;gap:3px;width:100%;justify-content:flex-start;overflow:hidden;">
+        <span style="font-size:12px;flex-shrink:0;">📍</span>
+        <div style="display:flex;flex-direction:column;min-width:0;flex:1;overflow:hidden;">
+          <div style="display:flex;gap:3px;overflow:hidden;">
+            <span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="addr-main">--</span>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;">
+            <span style="font-size:9px;color:#9cf;white-space:nowrap;" id="addr-zip">〒--</span>
+            <span style="font-size:9px;color:#9cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="addr-road">🛤️--</span>
+            <span style="font-size:9px;color:#adf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="addr-landmark">🏛️--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 駅 (span2) -->
+    <div class="card span2" id="c-st" onclick="toggleCard(this)">
       <div class="cdwn" id="cd-st"></div>
-      <div class="poi-blk" id="st-list"><div class="sm">🚉 取得中...</div></div>
+      <div class="card-body"><div class="poi-blk" id="st-list"><div class="card-sub">🚉 取得中...</div></div></div>
     </div>
-    <div class="card">
-      <div class="cdwn" id="cd-wc"></div>
-      <div class="poi-blk" id="wc-list"><div class="sm">🚻 取得中...</div></div>
-    </div>
-    <div class="card">
-      <div class="cdwn" id="cd-gs"></div>
-      <div class="poi-blk" id="gs-list"><div class="sm">⛽ 取得中...</div></div>
-    </div>
-  </div>
 
+    <!-- トイレ (span2) -->
+    <div class="card span2" id="c-wc" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-wc"></div>
+      <div class="card-body"><div class="poi-blk" id="wc-list"><div class="card-sub">🚻 取得中...</div></div></div>
+    </div>
+
+    <!-- GS (span2) -->
+    <div class="card span2" id="c-gs" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-gs"></div>
+      <div class="card-body"><div class="poi-blk" id="gs-list"><div class="card-sub">⛽ 取得中...</div></div></div>
+    </div>
+
+    <!-- コンビニ (span2) -->
+    <div class="card span2" id="c-cv" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-cv"></div>
+      <div class="card-body"><div class="poi-blk" id="cv-list"><div class="card-sub">🏪 取得中...</div></div></div>
+    </div>
+
+    <!-- 道の駅 (span2) -->
+    <div class="card span2" id="c-rs" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-rs"></div>
+      <div class="card-body"><div class="poi-blk" id="rs-list"><div class="card-sub">🗺️ 取得中...</div></div></div>
+    </div>
+
+    <!-- ランドマーク (span2) -->
+    <div class="card span2" id="c-lm" onclick="toggleCard(this)">
+      <div class="cdwn" id="cd-lm"></div>
+      <div class="card-body"><div class="poi-blk" id="lm-list"><div class="card-sub">🏛️ 取得中...</div></div></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
 /* ===== 定数 ===== */
 const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌦️',63:'🌧️',65:'🌧️',71:'🌨️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const D16=['北','北北東','北東','東北東','東','東南東','南東','南南東','南','南南西','南西','西南西','西','西北西','北西','北北西'];
+const DA16=['↑','↗↑','↗','↗↓','→','↘↑','↘','↘↓','↓','↙↓','↙','↙↑','←','↖↓','↖','↖↑'];
+const MOON_PHASE=['🌑','🌒','🌒','🌓','🌔','🌕','🌕','🌖','🌗','🌘','🌑'];
 
 /* ===== 状態 ===== */
-let lat=null,lon=null,totalDist=0;
-let lastWx=0,lastAddr=0,lastPOI=0;
-// カウントダウン残秒
-const cd={wx:300,sun:300,addr:60,poi:30,fast:3};
+let lat=null,lon=null,totalDist=0,ecoMode=false;
+let BASE={wx:300,addr:60,poi:30,fast:2};
+let cd={wx:0,addr:0,poi:0,fast:0};
 
 /* ===== ユーティリティ ===== */
 const r2d=r=>r*180/Math.PI,d2r=d=>d*Math.PI/180;
-function brng(a,b,c,e){
-  const dl=d2r(e-b),y=Math.sin(dl)*Math.cos(d2r(c)),x=Math.cos(d2r(a))*Math.sin(d2r(c))-Math.sin(d2r(a))*Math.cos(d2r(c))*Math.cos(dl);
-  return(r2d(Math.atan2(y,x))+360)%360;
-}
-function dst(a,b,c,e){
-  const R=6371,s=Math.sin(d2r((c-a)/2))**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(d2r((e-b)/2))**2;
-  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
-}
+function brng(a,b,c,e){const dl=d2r(e-b),y=Math.sin(dl)*Math.cos(d2r(c)),x=Math.cos(d2r(a))*Math.sin(d2r(c))-Math.sin(d2r(a))*Math.cos(d2r(c))*Math.cos(dl);return(r2d(Math.atan2(y,x))+360)%360;}
+function dst(a,b,c,e){const R=6371,s=Math.sin(d2r((c-a)/2))**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(d2r((e-b)/2))**2;return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
 function dl(b){return D16[Math.round(b/22.5)%16];}
+function da(b){return DA16[Math.round(b/22.5)%16];}
 function fd(km){return km<1?Math.round(km*1000)+'m':km.toFixed(1)+'km';}
-function fdd(la2,lo2){return fd(dst(lat,lon,la2,lo2))+' '+dl(brng(lat,lon,la2,lo2));}
+function fdd(la2,lo2){const d=dst(lat,lon,la2,lo2),b=brng(lat,lon,la2,lo2);return fd(d)+' '+da(b)+dl(b);}
 function $i(id){return document.getElementById(id);}
+function moonPhase(d){const n=new Date(d);const age=(n-new Date(2000,0,6.5))/86400000%29.53;return MOON_PHASE[Math.round(Math.abs(age)/29.53*10)];}
+function accLabel(m){return m<=5?'🟢高':m<=20?'🟡中':'🔴低';}
+function pad2(n){return String(n).padStart(2,'0');}
 
-/* ===== API取得 ===== */
+/* ===== 時計 ===== */
+function tickClock(){
+  const n=new Date();
+  $i('clock-bar').textContent='🕐'+pad2(n.getHours())+':'+pad2(n.getMinutes())+':'+pad2(n.getSeconds());
+}
+
+/* ===== 天気 ===== */
 async function fetchWeather(){
   if(!lat||!lon)return;
   try{
     const[w,e]=await Promise.all([
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,precipitation_probability&daily=sunrise,sunset&timezone=Asia%2FTokyo&forecast_days=1`).then(r=>r.json()),
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,precipitation_probability,windspeed_10m,winddirection_10m,relativehumidity_2m,surface_pressure,swell_wave_height&daily=sunrise,sunset&timezone=Asia%2FTokyo&forecast_days=1`).then(r=>r.json()),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`).then(r=>r.json())
     ]);
     $i('wico').textContent=WMO[w.current.weathercode]||'🌡️';
     $i('wtemp').textContent=Math.round(w.current.temperature_2m)+'°';
     $i('wrain').textContent='💧'+(w.current.precipitation_probability??'--')+'%';
-    $i('sr').textContent=w.daily.sunrise[0].slice(11,16);
-    $i('ss').textContent=w.daily.sunset[0].slice(11,16);
+    const ws=Math.round(w.current.windspeed_10m||0),wd=w.current.winddirection_10m||0;
+    $i('wind').textContent='💨'+ws+'m/s '+da(wd)+dl(wd);
+    $i('humid').textContent='💧湿度'+(w.current.relativehumidity_2m??'--')+'%';
+    $i('pressure').textContent='🌀'+(w.current.surface_pressure?Math.round(w.current.surface_pressure):'--')+'hPa';
+    const wh=w.current.swell_wave_height;
+    $i('wave').textContent='🌊'+(wh!=null?wh.toFixed(1):'--')+'m';
+    $i('moon').textContent=moonPhase(new Date())+' 月';
+    const sr=w.daily.sunrise[0].slice(11,16);
+    const ss=w.daily.sunset[0].slice(11,16);
+    $i('sr').textContent=sr;$i('ss').textContent=ss;
     $i('elev').textContent=Math.round(e.elevation[0])+'m';
   }catch(ex){}
 }
 
+/* ===== 住所 ===== */
 async function fetchAddr(){
   if(!lat||!lon)return;
   try{
     const loc=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ja`).then(r=>r.json());
     const a=loc.address;
-    const pc=a.postcode?'〒'+a.postcode+' ':'';
-    const nm=pc+[a.state||'',a.city||a.town||a.village||'',a.suburb||a.neighbourhood||'',a.road||''].filter(Boolean).join('');
-    $i('addr').textContent=nm||loc.display_name.split(',').slice(0,2).join('');
+    const state=a.state||'';
+    const city=a.city||a.town||a.village||a.county||'';
+    const suburb=a.suburb||a.neighbourhood||'';
+    const road=a.road||'';
+    const house=a.house_number||'';
+    const building=a.building||a.amenity||'';
+    $i('addr-zip').textContent=a.postcode?'〒'+a.postcode:'〒--';
+    $i('addr-main').textContent=[state,city,suburb,road,house].filter(Boolean).join(' ');
+    $i('addr-road').textContent=road?'🛤️'+road:'🛤️--';
+    $i('addr-landmark').textContent=building?'🏛️'+building:'🏛️--';
+    $i('coords').textContent=lat.toFixed(3)+'/'+lon.toFixed(3);
   }catch(ex){}
 }
 
+/* ===== POI ===== */
 async function fetchPOI(filter,listId,ico){
   if(!lat||!lon)return;
   const q=`[out:json][timeout:12];(${filter});out center 20;`;
   try{
     const d=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)}).then(r=>r.json());
-    if(!d.elements?.length){$i(listId).innerHTML=`<div class="sm">${ico} なし</div>`;return;}
+    if(!d.elements?.length){$i(listId).innerHTML=`<div class="card-sub">${ico} なし</div>`;return;}
     const items=[];
     for(const el of d.elements){
       const la=el.lat||el.center?.lat,lo=el.lon||el.center?.lon;
       if(!la||!lo)continue;
-      items.push({la,lo,name:el.tags?.name||'(名称なし)',d:dst(lat,lon,la,lo),b:brng(lat,lon,la,lo)});
+      const nm=el.tags?.name||el.tags?.operator||'(名称なし)';
+      const line=el.tags?.['railway:line']||el.tags?.network||'';
+      const label=line?line+' '+nm:nm;
+      items.push({la,lo,name:label,d:dst(lat,lon,la,lo),b:brng(lat,lon,la,lo)});
     }
     items.sort((a,b)=>a.d-b.d);
     $i(listId).innerHTML=items.slice(0,3).map(it=>
-      `<div class="poi-row"><span class="pio">${ico}</span><div class="ptxt"><div class="pn">${it.name}</div><div class="pd">${fd(it.d)} ${dl(it.b)}</div></div></div>`
+      `<div class="poi-row"><span class="pio">${ico}</span><div class="ptxt"><div class="pn">${it.name}</div><div class="pd">${fd(it.d)} ${da(it.b)}${dl(it.b)}</div></div></div>`
     ).join('');
-  }catch(ex){$i(listId).innerHTML=`<div class="sm">エラー</div>`;}
+  }catch(ex){$i(listId).innerHTML=`<div class="card-sub">エラー</div>`;}
 }
 
 function fetchAllPOI(){
   fetchPOI('node["railway"="station"];node["railway"="halt"];','st-list','🚉');
   fetchPOI('node["amenity"="toilets"];way["amenity"="toilets"];','wc-list','🚻');
   fetchPOI('node["amenity"="fuel"];way["amenity"="fuel"];','gs-list','⛽');
+  fetchPOI('node["shop"="convenience"];','cv-list','🏪');
+  fetchPOI('node["highway"="rest_area"]["name"~"道の駅"];way["highway"="rest_area"]["name"~"道の駅"];relation["highway"="rest_area"]["name"~"道の駅"];','rs-list','🗺️');
+  fetchPOI('node["tourism"~"attraction|viewpoint|museum|artwork"];way["tourism"~"attraction|viewpoint|museum"];','lm-list','🏛️');
 }
 
 /* ===== GPS ===== */
 function startGeo(){
   navigator.geolocation.watchPosition(p=>{
     const la=p.coords.latitude,lo=p.coords.longitude;
-    if(lat!==null&&lon!==null){
-      const d=dst(lat,lon,la,lo);
-      if(d>0.005)totalDist+=d;
-    }
+    if(lat!==null&&lon!==null){const d=dst(lat,lon,la,lo);if(d>0.005)totalDist+=d;}
     lat=la;lon=lo;
     const spd=p.coords.speed!=null?Math.round(p.coords.speed*3.6):0;
     $i('spd').textContent=spd;
-    $i('dist').textContent=totalDist.toFixed(1);
-    $i('acc').textContent=Math.round(p.coords.accuracy);
+    $i('dist').textContent=totalDist.toFixed(1)+'km';
+    $i('acc').textContent='📡'+Math.round(p.coords.accuracy)+'m '+accLabel(p.coords.accuracy);
     $i('coords').textContent=la.toFixed(3)+'/'+lo.toFixed(3);
-  },()=>{$i('addr').textContent='📡 位置情報エラー';},{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  },()=>{}  ,{enableHighAccuracy:true,maximumAge:1500,timeout:15000});
 }
 
 /* ===== コンパス ===== */
@@ -287,30 +372,40 @@ function startCompass(){
   window.addEventListener('deviceorientation',onO,true);
 }
 
-/* ===== 毎秒タイマー ===== */
+/* ===== タイマー ===== */
 function startTimer(){
-  // カウントダウン表示更新
-  const cdIds={
-    wx:['cd-wx','cd-sun'],
-    addr:['cd-addr'],
-    poi:['cd-st','cd-wc','cd-gs'],
-    fast:['cd-hdg','cd-elv','cd-spd','cd-dst','cd-acc']
-  };
+  // 初期カウント
+  cd.wx=BASE.wx;cd.addr=BASE.addr;cd.poi=BASE.poi;cd.fast=BASE.fast;
   setInterval(()=>{
-    // wx/sun: 300s
-    cd.wx--;if(cd.wx<=0){cd.wx=300;fetchWeather();}
-    cdIds.wx.forEach(id=>$i(id).textContent=cd.wx+'s');
-    // addr: 60s
-    cd.addr--;if(cd.addr<=0){cd.addr=60;fetchAddr();}
-    cdIds.addr.forEach(id=>$i(id).textContent=cd.addr+'s');
-    // poi: 30s
-    cd.poi--;if(cd.poi<=0){cd.poi=30;fetchAllPOI();}
-    cdIds.poi.forEach(id=>$i(id).textContent=cd.poi+'s');
-    // fast: 3s (GPS系は watchPosition で自動更新のためカウントダウン表示のみ)
-    cd.fast--;if(cd.fast<=0)cd.fast=3;
-    cdIds.fast.forEach(id=>$i(id).textContent=cd.fast+'s');
+    tickClock();
+    // wx 5min
+    cd.wx--;if(cd.wx<=0){cd.wx=BASE.wx;fetchWeather();}
+    ['cd-wx','cd-wind','cd-wave','cd-sun'].forEach(id=>{const el=$i(id);if(el)el.textContent=cd.wx+'s';});
+    // addr 60s
+    cd.addr--;if(cd.addr<=0){cd.addr=BASE.addr;fetchAddr();}
+    $i('cd-addr').textContent=cd.addr+'s';
+    // poi 30s
+    cd.poi--;if(cd.poi<=0){cd.poi=BASE.poi;fetchAllPOI();}
+    ['cd-st','cd-wc','cd-gs','cd-cv','cd-rs','cd-lm'].forEach(id=>{const el=$i(id);if(el)el.textContent=cd.poi+'s';});
+    // fast 2s
+    cd.fast--;if(cd.fast<=0)cd.fast=BASE.fast;
+    ['cd-hdg','cd-elv','cd-spd','cd-dst'].forEach(id=>{const el=$i(id);if(el)el.textContent=cd.fast+'s';});
   },1000);
 }
+
+/* ===== 省電力 ===== */
+function toggleEco(){
+  ecoMode=!ecoMode;
+  BASE={wx:ecoMode?900:300,addr:ecoMode?180:60,poi:ecoMode?90:30,fast:ecoMode?6:2};
+  $i('ecoBtn').classList.toggle('eco-on',ecoMode);
+  $i('ecoBtn').textContent=ecoMode?'🔋 省電力ON':'🔋 省電力';
+}
+
+/* ===== カード非表示 ===== */
+function toggleCard(el){el.classList.toggle('hidden');}
+
+/* ===== 走行距離リセット ===== */
+function resetDist(){if(confirm('走行距離をリセットしますか？')){totalDist=0;$i('dist').textContent='0.0km';}}
 
 /* ===== スタート ===== */
 async function startApp(){
@@ -322,13 +417,11 @@ async function startApp(){
   navigator.geolocation.getCurrentPosition(()=>{
     $i('perm').style.display='none';
     $i('main').style.display='flex';
-    // 初回即時取得
+    // 初回強制取得
     fetchWeather();fetchAddr();fetchAllPOI();
-    startGeo();
-    startCompass();
-    startTimer();
+    startGeo();startCompass();startTimer();
   },err=>{
-    $i('permErr').textContent=err.code===1?'位置情報の許可が必要です。ブラウザ設定を確認してください。':'位置情報の取得に失敗しました。';
+    $i('permErr').textContent=err.code===1?'位置情報の許可が必要です。ブラウザ設定を確認してください。':'位置情報の取得に失敗しました。再度お試しください。';
     $i('permErr').style.display='block';
   },{enableHighAccuracy:true,timeout:15000});
 }
