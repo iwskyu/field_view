@@ -10,145 +10,40 @@
             --bg-grad-2: #243b55;
             --text-color: #ffffff;
         }
-
-        /* 画面上半分のみを使用する設定 */
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 50vh;
-            overflow: hidden;
-            font-family: sans-serif;
-            color: var(--text-color);
-            font-weight: bold;
-            font-size: 11px;
+            margin: 0; padding: 0; width: 100%; height: 50vh;
+            overflow: hidden; font-family: sans-serif; color: var(--text-color);
+            font-weight: bold; font-size: 11px;
             background: linear-gradient(45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-1));
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
         }
-
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* 全体コンテナ */
         #app-container {
-            display: none; /* 権限許可前は非表示 */
-            height: 100%;
-            padding: 4px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            height: 100%; padding: 4px; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-
-        /* ヘッダーエリア */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 2px;
-        }
-
-        /* 3列のメイングリッド（レイアウト崩れ防止） */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3px;
-            flex-grow: 1;
-            margin-top: 3px;
-            overflow: hidden;
-        }
-
-        /* 情報カード */
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            padding: 3px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            position: relative;
-            box-sizing: border-box;
-        }
-
-        .card.hidden-content *:not(.toggle-icon) {
-            visibility: hidden;
-        }
-
-        .toggle-icon {
-            font-size: 14px;
-            margin-bottom: 1px;
-        }
-
-        .cd-timer {
-            position: absolute;
-            top: 1px;
-            right: 2px;
-            font-size: 7px;
-            color: #ffeb3b;
-        }
-
-        /* スポットリスト用（3件表示） */
-        .spot-list {
-            font-size: 8px;
-            width: 100%;
-            line-height: 1.1;
-        }
-
-        /* 初期権限要求画面（画面上半分に収める） */
-        #auth-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 50vh;
-            background: #111;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        #auth-btn {
-            background: #00ffcc;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        /* ボタン類 */
-        .btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid #fff;
-            color: #fff;
-            border-radius: 3px;
-            padding: 1px 4px;
-            font-size: 9px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        #eco-btn.active {
-            background: #ff5722;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 2px; }
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; flex-grow: 1; margin-top: 3px; overflow: hidden; }
+        .card { background: rgba(255, 255, 255, 0.1); border-radius: 4px; padding: 3px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; position: relative; box-sizing: border-box; }
+        .card.hidden-content *:not(.toggle-icon) { visibility: hidden; }
+        .toggle-icon { font-size: 14px; margin-bottom: 1px; }
+        .cd-timer { position: absolute; top: 1px; right: 2px; font-size: 7px; color: #ffeb3b; }
+        .spot-list { font-size: 8px; width: 100%; line-height: 1.1; }
+        #auth-screen { position: absolute; top: 0; left: 0; width: 100%; height: 50vh; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        #auth-btn { background: #00ffcc; color: #000; border: none; padding: 15px 30px; font-weight: bold; border-radius: 25px; cursor: pointer; font-size: 14px; box-shadow: 0 0 10px #00ffcc; }
+        .btn { background: rgba(255,255,255,0.2); border: 1px solid #fff; color: #fff; border-radius: 3px; padding: 1px 4px; font-size: 9px; cursor: pointer; font-weight: bold; }
+        #eco-btn.active { background: #ff5722; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
-        <p style="text-align:center; margin-bottom:10px;">Drive View7<br>センサー・位置情報へのアクセス</p>
-        <button id="auth-btn" onclick="requestPermissions()">START</button>
+        <p style="text-align:center; margin-bottom:15px; font-size:14px;">Drive View7</p>
+        <button id="auth-btn" onclick="requestPermissions()">START (権限許可)</button>
     </div>
 
     <div id="app-container" style="display: none;">
@@ -161,92 +56,68 @@
         </div>
 
         <div class="grid-container">
-            
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🌤️</span>
-                <span class="cd-timer" id="timer-weather">300</span>
+                <span class="toggle-icon">🌤️</span> <span class="cd-timer" id="timer-weather">300</span>
                 <span id="weather-val">25℃ ☁️☂️ 30%</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🌅</span>
-                <span class="cd-timer" id="timer-sun">300</span>
+                <span class="toggle-icon">🌅</span> <span class="cd-timer" id="timer-sun">300</span>
                 <span id="sun-val">18:58 ↖SSW</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
                 <span class="toggle-icon">🌀</span>
                 <span id="env-val">9m 30% 3.5m 1000hPa 🌕</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)" style="grid-column: span 2;">
-                <span class="toggle-icon">📍</span>
-                <span class="cd-timer" id="timer-address">60</span>
+                <span class="toggle-icon">📍</span> <span class="cd-timer" id="timer-address">60</span>
                 <span id="address-val">〒150-0002 東京都渋谷区渋谷1-23-16</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
                 <span class="toggle-icon">🏢</span>
                 <span id="road-val">東京タワー / 国道17号</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)" style="grid-column: span 3; flex-direction: row; justify-content: space-around;">
-                <div>🧭 <span id="dir-val">SSW 83°</span></div>
-                <div>⛰️ <span id="alt-val">1234m</span></div>
+                <div>🧭 <span id="dir-val">---°</span></div>
+                <div>⛰️ <span id="alt-val">---m</span></div>
                 <div>⚡ <span id="speed-val">0 km/h</span></div>
                 <div>🛣️ <span id="dist-val">0.0 km</span></div>
-                <div>🛰️ <span id="gps-val">高</span></div>
+                <div>🛰️ <span id="gps-val">🔍</span></div>
                 <span class="cd-timer" id="timer-fast">2</span>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🚉</span>
-                <span class="cd-timer" id="timer-spot1">30</span>
+                <span class="toggle-icon">🚉</span> <span class="cd-timer" id="timer-spot1">30</span>
                 <div class="spot-list" id="station-list">検索中...</div>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🚾</span>
-                <span class="cd-timer" id="timer-spot2">30</span>
+                <span class="toggle-icon">🚾</span> <span class="cd-timer" id="timer-spot2">30</span>
                 <div class="spot-list" id="toilet-list">検索中...</div>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">⛽</span>
-                <span class="cd-timer" id="timer-spot3">30</span>
+                <span class="toggle-icon">⛽</span> <span class="cd-timer" id="timer-spot3">30</span>
                 <div class="spot-list" id="gas-list">検索中...</div>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🏪</span>
-                <span class="cd-timer" id="timer-spot4">30</span>
+                <span class="toggle-icon">🏪</span> <span class="cd-timer" id="timer-spot4">30</span>
                 <div class="spot-list" id="convenience-list">検索中...</div>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">⛕</span>
-                <span class="cd-timer" id="timer-spot5">30</span>
+                <span class="toggle-icon">⛕</span> <span class="cd-timer" id="timer-spot5">30</span>
                 <div class="spot-list" id="michinoeki-list">検索中...</div>
             </div>
-
             <div class="card" onclick="toggleCard(this)">
-                <span class="toggle-icon">🗼</span>
-                <span class="cd-timer" id="timer-spot6">30</span>
+                <span class="toggle-icon">🗼</span> <span class="cd-timer" id="timer-spot6">30</span>
                 <div class="spot-list" id="landmark-list">検索中...</div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // タイマーデフォルト値（秒）
         const TIMERS_DEF = { fast: 2, address: 60, spot: 30, weather: 300 };
         let timers = { fast: 2, address: 60, spot: 30, weather: 300 };
         let ecoMode = false;
         let totalDistance = 0;
         let lastPosition = null;
 
-        // 模擬データ生成用（APIキー未設定時のフォールバック用）
         const mockSpots = {
             station: ["東横線 渋谷駅 1.2km ↖", "山手線 新宿駅 3.4km ⬆", "京王線 明大前 4.1km ⬅"],
             toilet: ["宮下公園公衆トイレ 1.8km ↖", "渋谷駅西口トイレ 1.1km ↙", "代々木公園トイレ 2.5km ⬆"],
@@ -256,10 +127,124 @@
             landmark: ["東京タワー 1.8km ↖", "スクランブル交差 0.5km ↙", "ハチ公像 0.6km ↙"]
         };
 
-        // 権限要求
+        // 修正：Androidで絶対にボタンが止まらないように例外処理を強化
         function requestPermissions() {
+            // 1. まず画面を強制的に切り替える（ボタンが不発になるのを防ぐ）
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-container').style.display = 'flex';
+            
+            // 2. 位置情報の要求
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        // iOS13+ や一部Android用の方向センサー権限チェック
-                        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission
+                    (pos) => { handleLocationUpdate(pos); },
+                    (err) => { console.log("位置情報取得に失敗、または拒否されました。"); },
+                    { enableHighAccuracy: true }
+                );
+                navigator.geolocation.watchPosition(handleLocationUpdate, null, { enableHighAccuracy: true });
+            }
+
+            // 3. 方位センサーの要求（Android/iOS両対応の安全なトラップ）
+            try {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => { if (response == 'granted') { window.addEventListener('deviceorientation', handleOrientation); } })
+                        .catch(err => { window.addEventListener('deviceorientation', handleOrientation); });
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                }
+            } catch (e) {
+                console.log("方位センサーの初期化スキップ");
+            }
+
+            initApp();
+        }
+
+        function initApp() {
+            updateClock();
+            updateFastData();
+            updateAddressData();
+            updateSpotData();
+            updateWeatherData();
+            setInterval(tick, 1000);
+        }
+
+        function tick() {
+            updateClock();
+            timers.fast--;
+            if (timers.fast <= 0) { updateFastData(); timers.fast = ecoMode ? TIMERS_DEF.fast * 3 : TIMERS_DEF.fast; }
+            document.getElementById('timer-fast').innerText = timers.fast;
+
+            timers.address--;
+            if (timers.address <= 0) { updateAddressData(); timers.address = ecoMode ? TIMERS_DEF.address * 3 : TIMERS_DEF.address; }
+            document.getElementById('timer-address').innerText = timers.address;
+
+            timers.spot--;
+            if (timers.spot <= 0) { updateSpotData(); timers.spot = ecoMode ? TIMERS_DEF.spot * 3 : TIMERS_DEF.spot; }
+            for(let i=1; i<=6; i++) { document.getElementById(`timer-spot${i}`).innerText = timers.spot; }
+
+            timers.weather--;
+            if (timers.weather <= 0) { updateWeatherData(); timers.weather = ecoMode ? TIMERS_DEF.weather * 3 : TIMERS_DEF.weather; }
+            document.getElementById('timer-weather').innerText = timers.weather;
+            document.getElementById('timer-sun').innerText = timers.weather;
+        }
+
+        function toggleEcoMode() {
+            ecoMode = !ecoMode;
+            const btn = document.getElementById('eco-btn');
+            if (ecoMode) { btn.innerText = "🔋 省電力×3"; btn.classList.add('active'); } 
+            else { btn.innerText = "🔋 通常"; btn.classList.remove('active'); }
+        }
+
+        function updateAll() {
+            updateFastData(); updateAddressData(); updateSpotData(); updateWeatherData();
+            timers = { 
+                fast: ecoMode ? TIMERS_DEF.fast * 3 : TIMERS_DEF.fast,
+                address: ecoMode ? TIMERS_DEF.address * 3 : TIMERS_DEF.address,
+                spot: ecoMode ? TIMERS_DEF.spot * 3 : TIMERS_DEF.spot,
+                weather: ecoMode ? TIMERS_DEF.weather * 3 : TIMERS_DEF.weather
+            };
+        }
+
+        function toggleCard(cardElement) { cardElement.classList.toggle('hidden-content'); }
+        function updateClock() { const now = new Date(); document.getElementById('time-display').innerText = now.toTimeString().split(' ')[0].substring(0,5); }
+
+        function handleLocationUpdate(position) {
+            const coords = position.coords;
+            const speed = coords.speed ? Math.round(coords.speed * 3.6) : 0;
+            document.getElementById('speed-val').innerText = `${speed} km/h`;
+            const altitude = coords.altitude ? Math.round(coords.altitude) : 1234;
+            document.getElementById('alt-val').innerText = `${altitude}m`;
+            const accuracy = coords.accuracy;
+            document.getElementById('gps-val').innerText = accuracy < 20 ? "高" : accuracy < 50 ? "中" : "低";
+
+            if (lastPosition && coords.speed > 0.5) {
+                totalDistance += calculateDistance(lastPosition.latitude, lastPosition.longitude, coords.latitude, coords.longitude);
+                document.getElementById('dist-val').innerText = `${totalDistance.toFixed(1)} km`;
+            }
+            lastPosition = coords;
+        }
+
+        function updateFastData() {}
+        function updateAddressData() { document.getElementById('address-val').innerText = "〒150-0002 東京都渋谷区渋谷1-23-16"; document.getElementById('road-val').innerText = "東京タワー / 国道17号 上尾線"; }
+        function updateSpotData() { renderSpotList('station-list', mockSpots.station); renderSpotList('toilet-list', mockSpots.toilet); renderSpotList('gas-list', mockSpots.gas); renderSpotList('convenience-list', mockSpots.convenience); renderSpotList('michinoeki-list', mockSpots.michinoeki); renderSpotList('landmark-list', mockSpots.landmark); }
+        function renderSpotList(elementId, items) { let html = ""; items.forEach(item => { html += `<div>${item}</div>`; }); document.getElementById(elementId).innerHTML = html; }
+        function updateWeatherData() { document.getElementById('weather-val').innerText = "25℃ ☁️☂️ 30%"; document.getElementById('sun-val').innerText = "18:58 ↖SSW"; }
+
+        function handleOrientation(event) {
+            let heading = event.webkitCompassHeading || (360 - event.alpha);
+            if (heading) {
+                const directions = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
+                const index = Math.round(heading / 22.5) % 16;
+                document.getElementById('dir-val').innerText = `${directions[index]} ${Math.round(heading)}°`;
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+    </script>
+</body>
+</html>
