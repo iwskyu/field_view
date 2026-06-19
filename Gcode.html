@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>パーソナル・ナビダッシュボード</title>
+  <style>
+    :root {
+      --bg: #121212; --card: #1e1e1e; --text: #f0f0f0; --accent: #4caf50;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg); color: var(--text);
+      margin: 0; padding: 16px; display: flex; flex-direction: column; gap: 16px;
+    }
+    h1 { font-size: 1.2rem; text-align: center; margin: 0; }
+    .card {
+      background: var(--card); border-radius: 12px; padding: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .card h2 { font-size: 1rem; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 4px; color: var(--accent); }
+    .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
+    .poi-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 8px;
+    }
+    .arrow {
+      font-size: 1.5rem; display: inline-block; transition: transform 0.2s ease-out; color: var(--accent);
+    }
+    button {
+      background: var(--accent); color: #fff; border: none; padding: 16px;
+      font-size: 1.1rem; border-radius: 8px; font-weight: bold; cursor: pointer;
+      width: 100%; margin-bottom: 10px;
+    }
+    #error-msg { color: #ff5252; font-size: 0.85rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <h1>パーソナル・ナビ</h1>
+  <button id="start-btn">位置情報とコンパスを取得開始</button>
+  <div id="error-msg"></div>
+
+  <div class="card" id="location-card" style="display: none;">
+    <h2>現在地・環境</h2>
+    <div class="data-row"><span>地名:</span> <span id="loc-name">取得中...</span></div>
+    <div class="data-row"><span>標高:</span> <span id="elevation">取得中...</span></div>
+    <div class="data-row"><span>気温 / 天気:</span> <span id="weather">取得中...</span></div>
+    <div class="data-row"><span>日の出 / 日没:</span> <span id="sun-times">取得中...</span></div>
+    <div class="data-row"><span>端末の向き (北=0°):</span> <span id="heading">--°</span></div>
+  </div>
+
+  <div class="card" id="poi-card" style="display: none;">
+    <h2>周辺施設 (距離と相対方角)</h2>
+    <div class="poi-item">
+      <div>🚇 最寄り駅<br><small id="station-dist">-- km</small></div>
+      <div class="arrow" id="station-arrow">↑</div>
+    </div>
+    <div class="poi-item">
+      <div>🚻 公共トイレ<br><small id="toilet-dist">-- km</small></div>
+      <div class="arrow" id="toilet-arrow">↑</div>
+    </div>
+    <div class="poi-item">
+      <div>⛽ ガソリンスタンド<br><small id="gas-dist">-- km</small></div>
+      <div class="arrow" id="gas-arrow">↑</div>
+    </div>
+  </div>
+
+  <script>
+    let currentLat = null;
+    let currentLon = null;
+    let currentHeading = 0;
+    let pois = {};
+
+    const startBtn = document.getElementById('start-btn');
+    const errorMsg = document.getElementById('error-msg');
+
+    startBtn.addEventListener('click', async () => {
+      errorMsg.textContent = "";
+      
+      // iOS 13+ コンパスのパーミッション
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const permission = await DeviceOrientationEvent.requestPermission();
+          if (permission !== 'granted') throw new Error('コンパスへのアクセスが拒否されました');
+        } catch (err) {
+          errorMsg.textContent = "コンパスの許可が必要です。";
+          return;
+        }
+      }
+
+      window.addEventListener('deviceorientation', handleOrientation);
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          currentLat = position.coords.latitude;
+          currentLon = position.coords.longitude;
+          
+          document.getElementById('start-btn').style.display = 'none';
+          document.getElementById('location-card').style.display = 'block';
+          document.getElementById('poi-card').style.display = 'block';
+
+          fetchLocationData(currentLat, currentLon);
+          setupMockPOIs(currentLat, currentLon);
+        },
+        err => { errorMsg.textContent = "位置情報が取得できませんでした。"; },
+        { enableHighAccuracy: true }
+      );
+    });
+
+    async function fetchLocationData(lat, lon) {
+      // 地名取得 (Nominatim API)
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`);
+        const geoData = await geoRes.json();
+        document.getElementById('loc-name').textContent = geoData.address.city || geoData.address.town || geoData.address.suburb || "不明";
+      } catch { document.getElementById('loc-name').textContent = "取得エラー"; }
+
+      // 天気・標高・日の出・日没 (Open-Meteo API)
+      try {
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&elevation=nan&timezone=Asia%2FTokyo`);
+        const wData = await weatherRes.json();
+        
+        document.getElementById('elevation').textContent = wData.elevation + " m";
+        document.getElementById('weather').textContent = wData.current_weather.temperature + "°C (コード:" + wData.current_weather.weathercode + ")";
+        
+        const sunrise = new Date(wData.daily.sunrise[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const sunset = new Date(wData.daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('sun-times').textContent = sunrise + " / " + sunset;
+      } catch { document.getElementById('weather').textContent = "取得エラー"; }
+    }
+
+    // 施設データ (API連携用にモック座標を設定)
+    function setupMockPOIs(lat, lon) {
+      pois = {
+        station: { lat: lat + 0.005, lon: lon + 0.005, id: 'station' },
+        toilet: { lat: lat - 0.003, lon: lon + 0.002, id: 'toilet' },
+        gas: { lat: lat + 0.008, lon: lon - 0.004, id: 'gas' }
+      };
+      updatePOIDisplay();
+    }
+
+    function handleOrientation(event) {
+      let heading = null;
+      if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading; // iOS
+      } else if (event.alpha !== null) {
+        heading = 360 - event.alpha; // Android
+      }
+
+      if (heading !== null) {
+        currentHeading = heading;
+        document.getElementById('heading').textContent = Math.round(heading) + "°";
+        updatePOIDisplay();
+      }
+    }
+
+    function updatePOIDisplay() {
+      if (!currentLat || !currentLon) return;
+
+      for (const key in pois) {
+        const poi = pois[key];
+        const dist = calculateDistance(currentLat, currentLon, poi.lat, poi.lon);
+        const bearing = calculateBearing(currentLat, currentLon, poi.lat, poi.lon);
+        
+        // 端末の向きを考慮した相対的な矢印の角度
+        const relativeRotation = bearing - currentHeading;
+
+        document.getElementById(`${poi.id}-dist`).textContent = dist.toFixed(2) + " km";
+        document.getElementById(`${poi.id}-arrow`).style.transform = `rotate(${relativeRotation}deg)`;
+      }
+    }
+
+    // ハヴェルサインの公式 (距離計算)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // 地球の半径 (km)
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // 方位角計算
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+      const radLat1 = lat1 * Math.PI / 180;
+      const radLat2 = lat2 * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const y = Math.sin(dLon) * Math.cos(radLat2);
+      const x = Math.cos(radLat1) * Math.sin(radLat2) - Math.sin(radLat1) * Math.cos(radLat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+      return bearing;
+    }
+  </script>
+</body>
+</html>

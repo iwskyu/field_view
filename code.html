@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traveler HUD</title>
+
+<style>
+body{
+    background:#111;
+    color:#0f0;
+    font-family:monospace;
+    font-size:24px;
+    padding:20px;
+}
+.item{
+    margin-bottom:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="location"></div>
+<div id="weather"></div>
+<div id="sun"></div>
+<div id="altitude"></div>
+<div id="station"></div>
+<div id="toilet"></div>
+<div id="fuel"></div>
+
+<script>
+
+navigator.geolocation.getCurrentPosition(async pos=>{
+
+    const lat=pos.coords.latitude;
+    const lon=pos.coords.longitude;
+
+    // 地名
+    const geo=await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+    ).then(r=>r.json());
+
+    document.getElementById("location").innerText=
+      "📍 "+geo.display_name;
+
+    // 天気
+    const weather=await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&daily=sunrise,sunset&timezone=auto`
+    ).then(r=>r.json());
+
+    document.getElementById("weather").innerText=
+      "☀ "+weather.current.temperature_2m+"℃";
+
+    document.getElementById("sun").innerText=
+      "🌅 "+weather.daily.sunrise[0].slice(11,16)+
+      " 🌇 "+weather.daily.sunset[0].slice(11,16);
+
+    // 標高
+    const elev=await fetch(
+      `https://api.opentopodata.org/v1/srtm90m?locations=${lat},${lon}`
+    ).then(r=>r.json());
+
+    document.getElementById("altitude").innerText=
+      "⛰ "+elev.results[0].elevation+"m";
+
+});
+
+</script>
+
+</body>
+</html>
