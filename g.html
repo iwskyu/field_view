@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ride View</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
+    
+    /* 画面上半分専用のレイアウト */
+    .dashboard {
+      height: 50vh; width: 100vw; padding: 6px 10px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      background-color: #121212; border-bottom: 2px solid #444;
+    }
+    .spacer-bottom { height: 50vh; background-color: #000; }
+
+    /* ヘッダー情報群 */
+    .top-row { display: flex; justify-content: space-between; align-items: center; height: 12%; font-size: 1.4rem; font-weight: bold; }
+    .address { color: #ffeb3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
+    .timer { color: #888; font-size: 1rem; }
+
+    .env-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; text-align: center; font-size: 1.5rem; font-weight: bold; height: 12%; align-items: center; }
+    .sun-row { display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-size: 1.4rem; font-weight: bold; background: #222; border-radius: 6px; height: 12%; align-items: center; }
+
+    /* POIリスト (3件ずつ横並び) */
+    .poi-container { display: flex; flex-direction: column; gap: 4px; height: 60%; margin-top: 4px; }
+    .poi-category { display: flex; align-items: stretch; background: #1a1a1a; border-radius: 8px; overflow: hidden; height: 32%; }
+    .poi-icon { font-size: 1.8rem; width: 12%; display: flex; align-items: center; justify-content: center; background: #2a2a2a; }
+    .poi-items { display: flex; width: 88%; }
+    .poi-item { flex: 1; border-left: 1px solid #333; padding: 2px 4px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+    .poi-name { font-size: 1rem; font-weight: bold; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .poi-data { display: flex; justify-content: center; align-items: center; gap: 4px; }
+    .poi-dist { font-size: 1.3rem; font-weight: bold; color: #00e676; }
+    .arrow { font-size: 1.5rem; color: #00e676; transition: transform 0.2s linear; font-weight: bold; display: inline-block; }
+
+    /* 起動画面 */
+    .start-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .start-btn { background: #00e676; color: #000; border: none; padding: 20px 40px; font-size: 2rem; font-weight: bold; border-radius: 12px; }
+  </style>
+</head>
+<body>
+
+  <div id="start-screen" class="start-screen">
+    <button class="start-btn" onclick="startRideView()">Ride View 開始</button>
+  </div>
+
+  <div class="dashboard" id="dashboard" style="display:none;">
+    
+    <div class="top-row">
+      <div class="address">📍<span id="addr">---</span></div>
+      <div class="timer"><span id="timer">10</span>s</div>
+    </div>
+
+    <div class="env-row">
+      <div>🌡️<span id="temp">--</span>°</div>
+      <div><span id="weather">⏳</span></div>
+      <div>⛰️<span id="ele">--</span>m</div>
+      <div>🧭<span id="heading">---</span>°</div>
+    </div>
+
+    <div class="sun-row">
+      <div>🌅 <span id="sunrise">--:--</span> <span class="arrow" id="sunrise-arrow">↑</span></div>
+      <div>🌇 <span id="sunset">--:--</span> <span class="arrow" id="sunset-arrow">↑</span></div>
+    </div>
+
+    <div class="poi-container">
+      <div class="poi-category">
+        <div class="poi-icon">🚇</div>
+        <div class="poi-items" id="station-list"></div>
+      </div>
+      <div class="poi-category">
+        <div class="poi-icon">🚻</div>
+        <div class="poi-items" id="toilet-list"></div>
+      </div>
+      <div class="poi-category">
+        <div class="poi-icon">⛽</div>
+        <div class="poi-items" id="gas-list"></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="spacer-bottom"></div>
+
+  <script>
+    let currentLat = null, currentLon = null, currentHeading = 0;
+    let poiCache = { station: [], toilet: [], gas: [] };
+    let sunAzimuths = { sunrise: 90, sunset: 270 };
+    let refreshSec = 10;
+    let lastApiFetchTime = 0;
+
+    async function startRideView() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'flex';
+
+      // Android向けコンパスイベント優先、非対応なら標準イベント
+      if ('ondeviceorientationabsolute' in window) {
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+
+      // GPSの常時監視
+      navigator.geolocation.watchPosition(pos => {
+        currentLat = pos.coords.latitude;
+        currentLon = pos.coords.longitude;
+      }, err => console.error(err), { enableHighAccuracy: true, maximumAge: 5000 });
+
+      // 初回データ取得
+      await updateData();
+
+      // 10秒ごとのUI更新（データ通信は内部で制限）
+      setInterval(() => {
+        refreshSec--;
+        document.getElementById('timer').textContent = refreshSec;
+        if (refreshSec <= 0) {
+          refreshSec = 10;
+          updateData();
+        }
+      }, 1000);
+    }
+
+    async function updateData() {
+      if (!currentLat) return;
+
+      const now = Date.now();
+      // 外部APIの叩きすぎ防止 (60秒に1回だけフェッチ)
+      if (now - lastApiFetchTime > 60000) {
+        lastApiFetchTime = now;
+        fetchAddress(currentLat, currentLon);
+        fetchWeather(currentLat, currentLon);
+        fetchPOIs(currentLat, currentLon);
+        calcSunPositions(currentLat);
+      }
+      
+      // UIの描画（距離や方角の再計算）は10秒ごとに確実に実行
+      renderPOIs();
+      updateSunArrows();
+    }
+
+    // 1. 住所取得
+    async function fetchAddress(lat, lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16`);
+        const data = await res.json();
+        document.getElementById('addr').textContent = (data.address.city || data.address.town || "") + (data.address.suburb || data.address.road || "");
+      } catch (e) {}
+    }
+
+    // 2. 天気・標高・日照取得
+    async function fetchWeather(lat, lon) {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&elevation=nan&timezone=Asia%2FTokyo`);
+        const data = await res.json();
+        document.getElementById('temp').textContent = Math.round(data.current_weather.temperature);
+        document.getElementById('ele').textContent = Math.round(data.elevation);
+        document.getElementById('weather').textContent = getWeatherEmoji(data.current_weather.weathercode);
+        document.getElementById('sunrise').textContent = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('sunset').textContent = new Date(data.daily.sunset[0]).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      } catch (e) {}
+    }
+
+    // 3. 周辺施設取得 (Overpass API)
+    async function fetchPOIs(lat, lon) {
+      const query = `[out:json][timeout:10];(node["railway"="station"](around:5000,${lat},${lon});node["amenity"="toilets"](around:5000,${lat},${lon});node["amenity"="fuel"](around:8000,${lat},${lon}););out body;`;
+      try {
+        const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        
+        let s=[], t=[], f=[];
+        data.elements.forEach(el => {
+          const item = { name: el.tags.name || "-", lat: el.lat, lon: el.lon };
+          if(el.tags.railway === 'station') s.push(item);
+          else if(el.tags.amenity === 'toilets') t.push(item);
+          else if(el.tags.amenity === 'fuel') f.push(item);
+        });
+
+        // 現在地からの距離でソートし、上位3件をキャッシュ
+        poiCache.station = sortAndSlice(s, lat, lon);
+        poiCache.toilet = sortAndSlice(t, lat, lon);
+        poiCache.gas = sortAndSlice(f, lat, lon);
+        renderPOIs();
+      } catch (e) {}
+    }
+
+    function sortAndSlice(arr, lat, lon) {
+      return arr.map(i => ({...i, dist: calcDist(lat, lon, i.lat, i.lon)}))
+                .sort((a, b) => a.dist - b.dist).slice(0, 3);
+    }
+
+    // コンパス処理
+    function handleOrientation(e) {
+      let head = e.webkitCompassHeading || (e.absolute && e.alpha ? 360 - e.alpha : (e.alpha ? 360 - e.alpha : null));
+      if (head !== null) {
+        currentHeading = head;
+        document.getElementById('heading').textContent = Math.round(head).toString().padStart(3, '0');
+        renderPOIs();
+        updateSunArrows();
+      }
+    }
+
+    // HTML描画処理
+    function renderPOIs() {
+      if (!currentLat) return;
+      ['station', 'toilet', 'gas'].forEach(type => {
+        const container = document.getElementById(`${type}-list`);
+        container.innerHTML = "";
+        
+        // 最新の座標で距離を再計算・再ソート
+        const updatedList = poiCache[type].map(item => ({
+          ...item, 
+          currentDist: calcDist(currentLat, currentLon, item.lat, item.lon),
+          bearing: calcBearing(currentLat, currentLon, item.lat, item.lon)
+        })).sort((a,b) => a.currentDist - b.currentDist);
+
+        // 3件分レンダリング (不足分は空枠)
+        for(let i=0; i<3; i++) {
+          const item = updatedList[i];
+          if(item) {
+            const rot = item.bearing - currentHeading;
+            const distStr = item.currentDist < 1 ? Math.round(item.currentDist * 1000) + "m" : item.currentDist.toFixed(1) + "k";
+            container.innerHTML += `
+              <div class="poi-item">
+                <div class="poi-name">${item.name}</div>
+                <div class="poi-data"><span class="poi-dist">${distStr}</span><span class="arrow" style="transform:rotate(${rot}deg)">↑</span></div>
+              </div>`;
+          } else {
+            container.innerHTML += `<div class="poi-item"><div class="poi-name">-</div><div class="poi-data">-</div></div>`;
+          }
+        }
+      });
+    }
+
+    function updateSunArrows() {
+      document.getElementById('sunrise-arrow').style.transform = `rotate(${sunAzimuths.sunrise - currentHeading}deg)`;
+      document.getElementById('sunset-arrow').style.transform = `rotate(${sunAzimuths.sunset - currentHeading}deg)`;
+    }
+
+    // 計算ユーティリティ
+    function calcDist(la1, lo1, la2, lo2) {
+      const R = 6371, dLa = (la2-la1)*Math.PI/180, dLo = (lo2-lo1)*Math.PI/180;
+      const a = Math.sin(dLa/2)**2 + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+    function calcBearing(la1, lo1, la2, lo2) {
+      const rLa1 = la1*Math.PI/180, rLa2 = la2*Math.PI/180, dLo = (lo2-lo1)*Math.PI/180;
+      return (Math.atan2(Math.sin(dLo)*Math.cos(rLa2), Math.cos(rLa1)*Math.sin(rLa2) - Math.sin(rLa1)*Math.cos(rLa2)*Math.cos(dLo))*180/Math.PI + 360)%360;
+    }
+    function calcSunPositions(lat) {
+      const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0))/86400000);
+      const dec = 23.44 * Math.sin((360/365)*(day-80)*Math.PI/180)*Math.PI/180;
+      const az = Math.acos(Math.max(-1, Math.min(1, Math.sin(dec)/Math.cos(lat*Math.PI/180))))*180/Math.PI;
+      sunAzimuths = { sunrise: az, sunset: 360 - az };
+    }
+    function getWeatherEmoji(c) {
+      if(c===0) return "☀️"; if([1,2,3].includes(c)) return "⛅"; if([45,48].includes(c)) return "🌫️";
+      if([51,53,55,80,81,82].includes(c)) return "🌦️"; if([61,63,65,66,67].includes(c)) return "🌧️";
+      if([71,73,75,77,85,86].includes(c)) return "❄️"; if([95,96,99].includes(c)) return "⚡"; return "⛅";
+    }
+  </script>
+</body>
+</html>

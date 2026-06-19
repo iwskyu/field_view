@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ride View</title>
+
+<style>
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#00ff88;
+  font-family: monospace;
+  overflow:hidden;
+}
+
+#app{
+  height:50vh;
+  padding:10px;
+  font-size:22px;
+  line-height:1.4;
+}
+
+.big{
+  font-size:26px;
+}
+
+.row{
+  margin:6px 0;
+}
+
+.small{
+  font-size:18px;
+  opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <div id="loc">📍</div>
+  <div id="weather"></div>
+  <div id="sun"></div>
+  <div id="compass"></div>
+  <div id="alt"></div>
+
+  <div class="row" id="stations">🚉</div>
+  <div class="row" id="toilets">🚻</div>
+  <div class="row" id="fuel">⛽</div>
+</div>
+
+<script>
+
+let lat=0, lon=0, heading=0;
+
+navigator.geolocation.getCurrentPosition(p=>{
+  lat=p.coords.latitude;
+  lon=p.coords.longitude;
+  updateAll();
+});
+
+window.addEventListener("deviceorientationabsolute", e=>{
+  if(e.alpha!=null) heading = e.alpha;
+});
+
+function dist(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=
+    Math.sin(dLat/2)**2+
+    Math.cos(lat1*Math.PI/180)*
+    Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function bearing(lat1,lon1,lat2,lon2){
+  const y=Math.sin(lon2-lon1)*Math.cos(lat2);
+  const x=Math.cos(lat1)*Math.sin(lat2)-
+          Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function dir(b){
+  const d=["N","NE","E","SE","S","SW","W","NW"];
+  return d[Math.round(b/45)%8];
+}
+
+async function overpass(query){
+  const url="https://overpass-api.de/api/interpreter";
+  const res=await fetch(url,{
+    method:"POST",
+    body:query
+  });
+  return res.json();
+}
+
+async function updateAll(){
+
+// 天気
+const w=await fetch(
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&daily=sunrise,sunset&timezone=auto`
+).then(r=>r.json());
+
+document.getElementById("weather").innerHTML=
+`☀ ${w.current.temperature_2m}℃`;
+
+document.getElementById("sun").innerHTML=
+`🌅 ${w.daily.sunrise[0].slice(11,16)} 🌇 ${w.daily.sunset[0].slice(11,16)}`;
+
+// 住所
+const geo=await fetch(
+`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+).then(r=>r.json());
+
+document.getElementById("loc").innerHTML=
+`📍 ${geo.address.city || geo.address.town || ""}`;
+
+// 標高
+const alt=await fetch(
+`https://api.opentopodata.org/v1/srtm90m?locations=${lat},${lon}`
+).then(r=>r.json());
+
+document.getElementById("alt").innerHTML=
+`⛰ ${Math.round(alt.results[0].elevation)}m`;
+
+// コンパス
+document.getElementById("compass").innerHTML=
+`🧭 ${Math.round(heading)}° ${dir(heading)}`;
+
+// 駅・トイレ・GS
+loadPOI("station","railway=station","stations");
+loadPOI("toilet","amenity=toilets","toilets");
+loadPOI("fuel","amenity=fuel","fuel");
+
+}
+
+async function loadPOI(type,tag,id){
+
+const q=`
+[out:json];
+node[${tag}](around:1500,${lat},${lon});
+out;
+`;
+
+const data=await fetch(
+"https://overpass-api.de/api/interpreter",
+{method:"POST",body:q}
+).then(r=>r.json());
+
+let list=data.elements.map(e=>{
+  const d=dist(lat,lon,e.lat,e.lon);
+  const b=bearing(lat,lon,e.lat,e.lon);
+  return {
+    name:e.tags.name||type,
+    dist:d,
+    dir:dir(b)
+  };
+});
+
+list.sort((a,b)=>a.dist-b.dist);
+list=list.slice(0,3);
+
+document.getElementById(id).innerHTML=
+(list.map(x=>`${x.name} ${x.dist.toFixed(1)}km ${x.dir}`).join("<br>"));
+}
+
+// 10秒ごと更新（データのみ）
+setInterval(updateAll,10000);
+
+</script>
+</body>
+</html>
