@@ -6,170 +6,389 @@
 <title>Ride View</title>
 
 <style>
-body{
+html,body{
   margin:0;
-  background:#0b0b0b;
-  color:#00ff88;
-  font-family: monospace;
+  padding:0;
+  height:100%;
   overflow:hidden;
+  font-family: system-ui;
+  color:#fff;
 }
 
-#app{
-  height:50vh;
-  padding:10px;
-  font-size:22px;
-  line-height:1.4;
+/* 動く背景 */
+body{
+  background: linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#1c1c1c);
+  background-size:400% 400%;
+  animation: bg 12s ease infinite;
 }
 
-.big{
-  font-size:26px;
+@keyframes bg{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
 }
 
-.row{
-  margin:6px 0;
-}
-
-.small{
+/* 上半分HUD */
+#hud{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:50%;
+  padding:12px;
+  box-sizing:border-box;
   font-size:18px;
-  opacity:0.9;
+  display:none;
+}
+
+.row{margin:4px 0;}
+.big{font-size:22px;}
+.small{font-size:14px; opacity:0.8;}
+
+#start{
+  position:fixed;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:22px;
+  padding:16px 24px;
+  border:none;
+  border-radius:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="app">
-  <div id="loc">📍</div>
-  <div id="weather"></div>
-  <div id="sun"></div>
-  <div id="compass"></div>
-  <div id="alt"></div>
+<button id="start">🚀 START / 権限許可</button>
 
-  <div class="row" id="stations">🚉</div>
-  <div class="row" id="toilets">🚻</div>
-  <div class="row" id="fuel">⛽</div>
+<div id="hud">
+
+  <div class="row big">📍 <span id="addr">---</span></div>
+
+  <div class="row">🏍 <span id="speed">0</span> km/h</div>
+  <div class="row">🛣 <span id="dist">0</span> km</div>
+  <div class="row">📡 ±<span id="acc">0</span> m</div>
+
+  <div class="row">🧭 <span id="head">---</span>°</div>
+
+  <div class="row small">
+    ⏱ GPS更新:<span id="cd">3</span>s
+  </div>
+<div class="row">🌥 <span id="weather">---</span></div>
+<div class="row">🌅 <span id="sunrise">---</span></div>
+<div class="row">🌇 <span id="sunset">---</span></div>
+<div class="row">📍 <span id="address">---</span></div>
+<div class="row">⛰ <span id="alt">---</span> m</div>
+
+<div class="row small">
+  ⏱ 天気更新:<span id="cd_weather">300</span>s
+</div>
+
+<div class="row">🚉 <span id="stations">---</span></div>
+<div class="row">🚻 <span id="toilets">---</span></div>
+<div class="row">⛽ <span id="fuel">---</span></div>
+
+<div class="row small">
+  ⏱ POI更新:<span id="cd_poi">30</span>s
+</div>
 </div>
 
 <script>
 
-let lat=0, lon=0, heading=0;
+let watchId;
+let lastPos=null;
+let totalDist=0;
+let lastUpdate=3;
+let heading=0;
 
-navigator.geolocation.getCurrentPosition(p=>{
-  lat=p.coords.latitude;
-  lon=p.coords.longitude;
-  updateAll();
-});
+/* 距離計算 */
+function calcDist(lat1,lon1,lat2,lon2){
+  const R=6371e3;
+  const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLon=toRad(lon2-lon1);
 
-window.addEventListener("deviceorientationabsolute", e=>{
-  if(e.alpha!=null) heading = e.alpha;
-});
-
-function dist(lat1,lon1,lat2,lon2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLon=(lon2-lon1)*Math.PI/180;
-  const a=
-    Math.sin(dLat/2)**2+
-    Math.cos(lat1*Math.PI/180)*
-    Math.cos(lat2*Math.PI/180)*
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
     Math.sin(dLon/2)**2;
+
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function bearing(lat1,lon1,lat2,lon2){
-  const y=Math.sin(lon2-lon1)*Math.cos(lat2);
-  const x=Math.cos(lat1)*Math.sin(lat2)-
-          Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1);
-  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+/* コンパス */
+window.addEventListener("deviceorientation",e=>{
+  if(e.alpha!==null){
+    heading=Math.round(e.alpha);
+    document.getElementById("head").innerText=heading;
+  }
+});
+
+/* START */
+document.getElementById("start").onclick=async()=>{
+
+  document.getElementById("start").style.display="none";
+  document.getElementById("hud").style.display="block";
+
+  navigator.geolocation.getCurrentPosition(()=>{},()=>{});
+
+  watchId=navigator.geolocation.watchPosition(pos=>{
+
+    const lat=pos.coords.latitude;
+    const lon=pos.coords.longitude;
+    const acc=pos.coords.accuracy;
+
+    document.getElementById("acc").innerText=Math.round(acc);
+
+    /* 速度 */
+    let speed=pos.coords.speed;
+    if(speed===null) speed=0;
+    speed=Math.round(speed*3.6);
+    document.getElementById("speed").innerText=speed;
+
+    /* 距離 */
+    if(lastPos){
+      const d=calcDist(
+        lastPos.lat,lastPos.lon,
+        lat,lon
+      );
+      if(d<50) totalDist+=d;
+    }
+
+    lastPos={lat,lon};
+
+    document.getElementById("dist")
+      .innerText=(totalDist/1000).toFixed(2);
+
+  },{
+    enableHighAccuracy:true,
+    maximumAge:1000
+  });
+
+  /* 3秒カウントダウン */
+  setInterval(()=>{
+    lastUpdate--;
+    if(lastUpdate<=0) lastUpdate=3;
+    document.getElementById("cd").innerText=lastUpdate;
+  },1000);
+
+};
+
+</script>
+
+</body>
+</html>
+
+
+/* =========================
+   API: 天気・日出日没
+========================= */
+let lat0=0, lon0=0;
+
+/* Open-Meteo 天気 */
+async function getWeather(lat,lon){
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weather_code&daily=sunrise,sunset&timezone=auto`;
+
+  const res=await fetch(url);
+  return await res.json();
 }
 
-function dir(b){
-  const d=["N","NE","E","SE","S","SW","W","NW"];
-  return d[Math.round(b/45)%8];
+/* 住所取得（Nominatim） */
+async function getAddress(lat,lon){
+  const url=`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+  const res=await fetch(url);
+  const j=await res.json();
+  return j.display_name || "";
+}
+
+/* 標高 */
+async function getAlt(lat,lon){
+  const url=`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
+  const res=await fetch(url);
+  const j=await res.json();
+  return j.results[0].elevation;
+}
+
+/* =========================
+   GPS更新フック（Part1と統合）
+========================= */
+
+function updateAll(lat,lon){
+
+  lat0=lat; lon0=lon;
+
+  /* 天気（5分） */
+  getWeather(lat,lon).then(w=>{
+
+    const t=w.current.temperature_2m;
+    const code=w.current.weather_code;
+    const rain=w.current.precipitation;
+
+    document.getElementById("weather").innerText=
+      `${t}℃ code:${code} ☔${rain}%`;
+
+    document.getElementById("sunrise").innerText=
+      `🌅 ${w.daily.sunrise[0].slice(11,16)}`;
+
+    document.getElementById("sunset").innerText=
+      `🌇 ${w.daily.sunset[0].slice(11,16)}`;
+  });
+
+  /* 住所（60秒） */
+  getAddress(lat,lon).then(addr=>{
+    document.getElementById("address").innerText=addr;
+  });
+
+  /* 標高（3秒更新枠） */
+  getAlt(lat,lon).then(a=>{
+    document.getElementById("alt").innerText=Math.round(a);
+  });
+
+}
+
+/* =========================
+   Part1 GPSにフック追加
+========================= */
+
+let lastWeather=0;
+let lastAddr=0;
+let lastAlt=0;
+
+/* watchPositionの中に追加 */
+function onGPS(lat,lon){
+
+  const now=Date.now();
+
+  /* 3秒更新系（Part1統合） */
+  if(now-lastAlt>3000){
+    getAlt(lat,lon).then(a=>{
+      document.getElementById("alt").innerText=Math.round(a);
+    });
+    lastAlt=now;
+  }
+
+  /* 60秒：住所 */
+  if(now-lastAddr>60000){
+    getAddress(lat,lon).then(addr=>{
+      document.getElementById("address").innerText=addr;
+    });
+    lastAddr=now;
+  }
+
+  /* 5分：天気 */
+  if(now-lastWeather>300000){
+    updateAll(lat,lon);
+    lastWeather=now;
+  }
+}
+
+function deg(lat1,lon1,lat2,lon2){
+  const toRad=x=>x*Math.PI/180;
+  const dLon=toRad(lon2-lon1);
+
+  const y=Math.sin(dLon)*Math.cos(toRad(lat2));
+  const x=Math.cos(toRad(lat1))*Math.sin(toRad(lat2))-
+          Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(dLon);
+
+  let brng=Math.atan2(y,x)*180/Math.PI;
+  return (brng+360)%360;
+}
+
+function dist(lat1,lon1,lat2,lon2){
+  const R=6371e3;
+  const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLon=toRad(lon2-lon1);
+
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
+    Math.sin(dLon/2)**2;
+
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 async function overpass(query){
   const url="https://overpass-api.de/api/interpreter";
+
   const res=await fetch(url,{
     method:"POST",
-    body:query
+    body:"data="+encodeURIComponent(query)
   });
-  return res.json();
+
+  return await res.json();
 }
 
-async function updateAll(){
-
-// 天気
-const w=await fetch(
-`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&daily=sunrise,sunset&timezone=auto`
-).then(r=>r.json());
-
-document.getElementById("weather").innerHTML=
-`☀ ${w.current.temperature_2m}℃`;
-
-document.getElementById("sun").innerHTML=
-`🌅 ${w.daily.sunrise[0].slice(11,16)} 🌇 ${w.daily.sunset[0].slice(11,16)}`;
-
-// 住所
-const geo=await fetch(
-`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-).then(r=>r.json());
-
-document.getElementById("loc").innerHTML=
-`📍 ${geo.address.city || geo.address.town || ""}`;
-
-// 標高
-const alt=await fetch(
-`https://api.opentopodata.org/v1/srtm90m?locations=${lat},${lon}`
-).then(r=>r.json());
-
-document.getElementById("alt").innerHTML=
-`⛰ ${Math.round(alt.results[0].elevation)}m`;
-
-// コンパス
-document.getElementById("compass").innerHTML=
-`🧭 ${Math.round(heading)}° ${dir(heading)}`;
-
-// 駅・トイレ・GS
-loadPOI("station","railway=station","stations");
-loadPOI("toilet","amenity=toilets","toilets");
-loadPOI("fuel","amenity=fuel","fuel");
-
-}
-
-async function loadPOI(type,tag,id){
+async function getStations(lat,lon){
 
 const q=`
 [out:json];
-node[${tag}](around:1500,${lat},${lon});
+node(around:2000,${lat},${lon})["railway"="station"];
 out;
 `;
 
-const data=await fetch(
-"https://overpass-api.de/api/interpreter",
-{method:"POST",body:q}
-).then(r=>r.json());
+const data=await overpass(q);
 
-let list=data.elements.map(e=>{
-  const d=dist(lat,lon,e.lat,e.lon);
-  const b=bearing(lat,lon,e.lat,e.lon);
+return data.elements.slice(0,3).map(e=>{
   return {
-    name:e.tags.name||type,
-    dist:d,
-    dir:dir(b)
+    name:e.tags.name||"駅",
+    lat:e.lat,
+    lon:e.lon
   };
 });
-
-list.sort((a,b)=>a.dist-b.dist);
-list=list.slice(0,3);
-
-document.getElementById(id).innerHTML=
-(list.map(x=>`${x.name} ${x.dist.toFixed(1)}km ${x.dir}`).join("<br>"));
 }
 
-// 10秒ごと更新（データのみ）
-setInterval(updateAll,10000);
+async function getToilets(lat,lon){
 
-</script>
-</body>
-</html>
+const q=`
+[out:json];
+node(around:1500,${lat},${lon})["amenity"="toilets"];
+out;
+`;
+
+const data=await overpass(q);
+
+return data.elements.slice(0,3).map(e=>{
+  return {
+    name:e.tags.name||"🚻",
+    lat:e.lat,
+    lon:e.lon
+  };
+});
+}
+
+<div class="row">🚉 <span id="stations">---</span></div>
+<div class="row">🚻 <span id="toilets">---</span></div>
+<div class="row">⛽ <span id="fuel">---</span></div>
+
+<div class="row small">
+  ⏱ POI更新:<span id="cd_poi">30</span>s
+</div>
+
+<div class="row">🚉 <span id="stations">---</span></div>
+<div class="row">🚻 <span id="toilets">---</span></div>
+<div class="row">⛽ <span id="fuel">---</span></div>
+
+<div class="row small">
+  ⏱ POI更新:<span id="cd_poi">30</span>s
+</div>
+
+<div class="row">🚉 <span id="stations">---</span></div>
+<div class="row">🚻 <span id="toilets">---</span></div>
+<div class="row">⛽ <span id="fuel">---</span></div>
+
+<div class="row small">
+  ⏱ POI更新:<span id="cd_poi">30</span>s
+</div>
+
+if(Date.now()-lastPOI>30000){
+  updatePOI(lat,lon);
+  lastPOI=Date.now();
+}
+
+<div class="row">🚉 <span id="stations">---</span></div>
+<div class="row">🚻 <span id="toilets">---</span></div>
+<div class="row">⛽ <span id="fuel">---</span></div>
+
+<div class="row small">
+  ⏱ POI更新:<span id="cd_poi">30</span>s
+</div>

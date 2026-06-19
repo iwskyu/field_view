@@ -6,70 +6,103 @@
 <title>Ride View</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100vw;height:50vh;overflow:hidden;background:#0a0a0a;color:#fff;font-family:sans-serif;}
+html,body{width:100vw;height:50vh;overflow:hidden;font-family:sans-serif;color:#fff;}
 
-/* 初回権限画面 */
-#perm{position:fixed;inset:0;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100;}
-#perm h1{font-size:22px;font-weight:700;}
-#perm p{font-size:13px;color:#aaa;text-align:center;max-width:280px;line-height:1.6;}
-#startBtn{font-size:18px;background:#2a6;border:none;color:#fff;padding:14px 40px;border-radius:12px;cursor:pointer;font-weight:700;}
-#startBtn:active{opacity:.7;}
+/* アニメーション背景 */
+@keyframes bgmove{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+body{
+  background:linear-gradient(135deg,#0d1b2a,#1b2838,#0a1628,#162032,#0d1b2a);
+  background-size:400% 400%;
+  animation:bgmove 8s ease infinite;
+}
+
+/* 権限画面 */
+#perm{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:200;background:rgba(0,0,0,.7);}
+#perm .logo{font-size:44px;}
+#perm h1{font-size:24px;font-weight:700;letter-spacing:2px;}
+#perm p{font-size:13px;color:#aaa;text-align:center;max-width:260px;line-height:1.7;}
+#startBtn{font-size:17px;background:linear-gradient(135deg,#1a7a3a,#0f9a4a);border:none;color:#fff;padding:13px 38px;border-radius:30px;cursor:pointer;font-weight:700;box-shadow:0 0 20px #0f9a4a55;}
+#startBtn:active{transform:scale(.96);}
+#permErr{color:#f66;font-size:12px;display:none;text-align:center;}
 
 /* メイン */
 #main{display:none;width:100vw;height:50vh;flex-direction:column;gap:2px;padding:2px;}
-.row{display:flex;gap:2px;}
-.card{background:#1a1a1a;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 4px;flex:1;min-width:0;overflow:hidden;}
-.ico{font-size:15px;line-height:1;}
-.val{font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;}
-.sm{font-size:10px;color:#999;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
-.big{font-size:22px;font-weight:700;line-height:1;}
 
-/* compass */
-.cring{width:46px;height:46px;border-radius:50%;border:1.5px solid #444;position:relative;display:flex;align-items:center;justify-content:center;}
-.cl{position:absolute;font-size:8px;font-weight:700;}
-.cl-n{top:0;left:50%;transform:translateX(-50%);color:#f44;}
+.row{display:flex;gap:2px;width:100%;}
+.card{
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:7px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:3px 4px;flex:1;min-width:0;overflow:hidden;
+  position:relative;
+}
+.ico{font-size:14px;line-height:1;}
+.val{font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;}
+.sm{font-size:9px;color:#aaa;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.big{font-size:20px;font-weight:700;line-height:1;}
+
+/* カウントダウンバッジ */
+.cdwn{position:absolute;top:2px;right:3px;font-size:8px;color:#5af;opacity:.8;font-weight:700;}
+
+/* コンパス */
+.cring{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.clb{position:absolute;font-size:7px;font-weight:700;}
+.cl-n{top:0;left:50%;transform:translateX(-50%);color:#f55;}
 .cl-s{bottom:0;left:50%;transform:translateX(-50%);}
 .cl-e{right:1px;top:50%;transform:translateY(-50%);}
 .cl-w{left:1px;top:50%;transform:translateY(-50%);}
-#cn{position:absolute;top:50%;left:50%;width:2px;height:16px;margin:-16px -1px 0;background:#f44;border-radius:1px 1px 0 0;transform-origin:bottom center;}
-#cs{position:absolute;top:50%;left:50%;width:2px;height:16px;margin:0 -1px;background:#555;border-radius:0 0 1px 1px;transform-origin:top center;}
+#ndl-n{position:absolute;top:50%;left:50%;width:2px;height:15px;margin:-15px -1px 0;background:#f55;border-radius:1px 1px 0 0;transform-origin:bottom center;transition:transform .3s;}
+#ndl-s{position:absolute;top:50%;left:50%;width:2px;height:15px;margin:0 -1px;background:#555;border-radius:0 0 1px 1px;transform-origin:top center;transition:transform .3s;}
 .cdot{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;top:50%;left:50%;margin:-2px 0 0 -2px;}
 
 /* POI */
-.poi-item{display:flex;align-items:flex-start;gap:2px;width:100%;border-bottom:1px solid #252525;padding:2px 0;}
-.poi-item:last-child{border-bottom:none;}
-.pio{font-size:12px;flex-shrink:0;margin-top:1px;}
+.poi-blk{width:100%;display:flex;flex-direction:column;gap:0;}
+.poi-row{display:flex;align-items:flex-start;gap:2px;width:100%;border-bottom:1px solid rgba(255,255,255,.08);padding:2px 0;}
+.poi-row:last-child{border-bottom:none;}
+.pio{font-size:11px;flex-shrink:0;margin-top:1px;}
 .ptxt{flex:1;min-width:0;}
 .pn{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pd{font-size:9px;color:#aaa;}
+.pd{font-size:9px;color:#9cf;}
 
-.addr{font-size:10px;font-weight:600;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;}
-#tmr{position:fixed;bottom:1px;right:3px;font-size:8px;color:#333;}
+/* 住所 */
+.addr-txt{font-size:10px;font-weight:600;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 </style>
 </head>
 <body>
 
 <!-- 権限取得画面 -->
 <div id="perm">
-  <div style="font-size:40px;">🏍️</div>
+  <div class="logo">🏍️</div>
   <h1>Ride View</h1>
-  <p>位置情報・センサーへのアクセスが必要です。<br>ボタンを押してスタートしてください。</p>
+  <p>位置情報・センサーの使用許可が必要です。ボタンを押してスタートしてください。</p>
   <button id="startBtn" onclick="startApp()">🚀 スタート</button>
-  <p id="permErr" style="color:#f66;font-size:12px;display:none;"></p>
+  <div id="permErr"></div>
 </div>
 
 <!-- メイン画面 -->
 <div id="main">
+
   <!-- Row1: 天気 / 日の出日没 / コンパス / 標高 -->
-  <div class="row" style="flex:2.2;">
-    <div class="card" style="flex:1.1;">
+  <div class="row" style="flex:2.4;">
+    <!-- 天気 -->
+    <div class="card" style="flex:1.05;">
+      <div class="cdwn" id="cd-wx"></div>
       <div class="ico" id="wico">🌡️</div>
       <div class="val" id="wtemp">--°</div>
       <div class="sm" id="wdesc">--</div>
       <div class="sm" id="wrain">💧--%</div>
     </div>
-    <div class="card" style="flex:1.4;">
-      <div style="display:flex;gap:5px;">
+    <!-- 日の出日没 -->
+    <div class="card" style="flex:1.35;">
+      <div class="cdwn" id="cd-sun"></div>
+      <div style="display:flex;gap:6px;">
         <div style="text-align:center;">
           <div class="ico">🌅</div>
           <div class="val" id="sr">--:--</div>
@@ -82,15 +115,20 @@ html,body{width:100vw;height:50vh;overflow:hidden;background:#0a0a0a;color:#fff;
         </div>
       </div>
     </div>
+    <!-- コンパス -->
     <div class="card" style="flex:1;">
+      <div class="cdwn" id="cd-hdg"></div>
       <div class="cring">
-        <span class="cl cl-n">N</span><span class="cl cl-s">S</span>
-        <span class="cl cl-e">E</span><span class="cl cl-w">W</span>
-        <div id="cn"></div><div id="cs"></div><div class="cdot"></div>
+        <span class="clb cl-n">N</span><span class="clb cl-s">S</span>
+        <span class="clb cl-e">E</span><span class="clb cl-w">W</span>
+        <div id="ndl-n"></div><div id="ndl-s"></div>
+        <div class="cdot"></div>
       </div>
       <div class="sm" id="hdg">--</div>
     </div>
+    <!-- 標高 -->
     <div class="card" style="flex:0.9;">
+      <div class="cdwn" id="cd-elv"></div>
       <div class="ico">⛰️</div>
       <div class="val" id="elev">--m</div>
       <div class="sm" id="coords">--</div>
@@ -99,20 +137,24 @@ html,body{width:100vw;height:50vh;overflow:hidden;background:#0a0a0a;color:#fff;
 
   <!-- Row2: 住所 / 速度 / 走行距離 / GPS精度 -->
   <div class="row" style="flex:1.5;">
-    <div class="card" style="flex:2.2;flex-direction:row;gap:3px;">
-      <span style="font-size:13px;flex-shrink:0;">📍</span>
-      <div class="addr" id="addr">--</div>
+    <div class="card" style="flex:2.3;flex-direction:row;gap:3px;justify-content:flex-start;">
+      <div class="cdwn" id="cd-addr"></div>
+      <span style="font-size:12px;flex-shrink:0;">📍</span>
+      <div class="addr-txt" id="addr">--</div>
     </div>
-    <div class="card" style="flex:0.85;">
+    <div class="card" style="flex:.85;">
+      <div class="cdwn" id="cd-spd"></div>
       <div class="big" id="spd">0</div>
       <div class="sm">km/h</div>
     </div>
-    <div class="card" style="flex:0.85;">
+    <div class="card" style="flex:.85;">
+      <div class="cdwn" id="cd-dst"></div>
       <div class="ico">🛣️</div>
       <div class="val" id="dist">0.0</div>
       <div class="sm">km</div>
     </div>
-    <div class="card" style="flex:0.7;">
+    <div class="card" style="flex:.7;">
+      <div class="cdwn" id="cd-acc"></div>
       <div class="ico">📡</div>
       <div class="val" id="acc">--</div>
       <div class="sm">m</div>
@@ -121,30 +163,49 @@ html,body{width:100vw;height:50vh;overflow:hidden;background:#0a0a0a;color:#fff;
 
   <!-- Row3: POI -->
   <div class="row" style="flex:3;">
-    <div class="card"><div id="st-list"><div class="sm">🚉...</div></div></div>
-    <div class="card"><div id="wc-list"><div class="sm">🚻...</div></div></div>
-    <div class="card"><div id="gs-list"><div class="sm">⛽...</div></div></div>
+    <div class="card">
+      <div class="cdwn" id="cd-st"></div>
+      <div class="poi-blk" id="st-list"><div class="sm">🚉 取得中...</div></div>
+    </div>
+    <div class="card">
+      <div class="cdwn" id="cd-wc"></div>
+      <div class="poi-blk" id="wc-list"><div class="sm">🚻 取得中...</div></div>
+    </div>
+    <div class="card">
+      <div class="cdwn" id="cd-gs"></div>
+      <div class="poi-blk" id="gs-list"><div class="sm">⛽ 取得中...</div></div>
+    </div>
   </div>
+
 </div>
 
-<div id="tmr"></div>
-
 <script>
+/* ===== 定数 ===== */
 const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌦️',63:'🌧️',65:'🌧️',71:'🌨️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const D16=['北','北北東','北東','東北東','東','東南東','南東','南南東','南','南南西','南西','西南西','西','西北西','北西','北北西'];
 
-let lat=null,lon=null,prevLat=null,prevLon=null;
-let totalDist=0; // km
-let lastWeather=0,lastAddr=0,lastPOI=0;
-let tick=3;
+/* ===== 状態 ===== */
+let lat=null,lon=null,totalDist=0;
+let lastWx=0,lastAddr=0,lastPOI=0;
+// カウントダウン残秒
+const cd={wx:300,sun:300,addr:60,poi:30,fast:3};
 
+/* ===== ユーティリティ ===== */
 const r2d=r=>r*180/Math.PI,d2r=d=>d*Math.PI/180;
-function brng(a,b,c,e){const dl=d2r(e-b),y=Math.sin(dl)*Math.cos(d2r(c)),x=Math.cos(d2r(a))*Math.sin(d2r(c))-Math.sin(d2r(a))*Math.cos(d2r(c))*Math.cos(dl);return(r2d(Math.atan2(y,x))+360)%360;}
-function dst(a,b,c,e){const R=6371,s=Math.sin(d2r((c-a)/2))**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(d2r((e-b)/2))**2;return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
+function brng(a,b,c,e){
+  const dl=d2r(e-b),y=Math.sin(dl)*Math.cos(d2r(c)),x=Math.cos(d2r(a))*Math.sin(d2r(c))-Math.sin(d2r(a))*Math.cos(d2r(c))*Math.cos(dl);
+  return(r2d(Math.atan2(y,x))+360)%360;
+}
+function dst(a,b,c,e){
+  const R=6371,s=Math.sin(d2r((c-a)/2))**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(d2r((e-b)/2))**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
 function dl(b){return D16[Math.round(b/22.5)%16];}
-function fd(m){return m<1?Math.round(m*1000)+'m':(m).toFixed(1)+'km';}
-function fdd(la2,lo2){const d=dst(lat,lon,la2,lo2),b=brng(lat,lon,la2,lo2);return fd(d)+' '+dl(b);}
+function fd(km){return km<1?Math.round(km*1000)+'m':km.toFixed(1)+'km';}
+function fdd(la2,lo2){return fd(dst(lat,lon,la2,lo2))+' '+dl(brng(lat,lon,la2,lo2));}
+function $i(id){return document.getElementById(id);}
 
+/* ===== API取得 ===== */
 async function fetchWeather(){
   if(!lat||!lon)return;
   try{
@@ -152,13 +213,12 @@ async function fetchWeather(){
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,precipitation_probability&daily=sunrise,sunset&timezone=Asia%2FTokyo&forecast_days=1`).then(r=>r.json()),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`).then(r=>r.json())
     ]);
-    document.getElementById('wico').textContent=WMO[w.current.weathercode]||'🌡️';
-    document.getElementById('wtemp').textContent=Math.round(w.current.temperature_2m)+'°';
-    document.getElementById('wrain').textContent='💧'+(w.current.precipitation_probability??'--')+'%';
-    document.getElementById('sr').textContent=w.daily.sunrise[0].slice(11,16);
-    document.getElementById('ss').textContent=w.daily.sunset[0].slice(11,16);
-    document.getElementById('elev').textContent=Math.round(e.elevation[0])+'m';
-    document.getElementById('coords').textContent=lat.toFixed(3)+'/'+lon.toFixed(3);
+    $i('wico').textContent=WMO[w.current.weathercode]||'🌡️';
+    $i('wtemp').textContent=Math.round(w.current.temperature_2m)+'°';
+    $i('wrain').textContent='💧'+(w.current.precipitation_probability??'--')+'%';
+    $i('sr').textContent=w.daily.sunrise[0].slice(11,16);
+    $i('ss').textContent=w.daily.sunset[0].slice(11,16);
+    $i('elev').textContent=Math.round(e.elevation[0])+'m';
   }catch(ex){}
 }
 
@@ -169,7 +229,7 @@ async function fetchAddr(){
     const a=loc.address;
     const pc=a.postcode?'〒'+a.postcode+' ':'';
     const nm=pc+[a.state||'',a.city||a.town||a.village||'',a.suburb||a.neighbourhood||'',a.road||''].filter(Boolean).join('');
-    document.getElementById('addr').textContent=nm||loc.display_name.split(',').slice(0,2).join('');
+    $i('addr').textContent=nm||loc.display_name.split(',').slice(0,2).join('');
   }catch(ex){}
 }
 
@@ -178,7 +238,7 @@ async function fetchPOI(filter,listId,ico){
   const q=`[out:json][timeout:12];(${filter});out center 20;`;
   try{
     const d=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)}).then(r=>r.json());
-    if(!d.elements?.length){document.getElementById(listId).innerHTML=`<div class="sm">${ico} なし</div>`;return;}
+    if(!d.elements?.length){$i(listId).innerHTML=`<div class="sm">${ico} なし</div>`;return;}
     const items=[];
     for(const el of d.elements){
       const la=el.lat||el.center?.lat,lo=el.lon||el.center?.lon;
@@ -186,10 +246,10 @@ async function fetchPOI(filter,listId,ico){
       items.push({la,lo,name:el.tags?.name||'(名称なし)',d:dst(lat,lon,la,lo),b:brng(lat,lon,la,lo)});
     }
     items.sort((a,b)=>a.d-b.d);
-    document.getElementById(listId).innerHTML=items.slice(0,3).map(it=>
-      `<div class="poi-item"><span class="pio">${ico}</span><div class="ptxt"><div class="pn">${it.name}</div><div class="pd">${fd(it.d)} ${dl(it.b)}</div></div></div>`
+    $i(listId).innerHTML=items.slice(0,3).map(it=>
+      `<div class="poi-row"><span class="pio">${ico}</span><div class="ptxt"><div class="pn">${it.name}</div><div class="pd">${fd(it.d)} ${dl(it.b)}</div></div></div>`
     ).join('');
-  }catch(ex){document.getElementById(listId).innerHTML=`<div class="sm">エラー</div>`;}
+  }catch(ex){$i(listId).innerHTML=`<div class="sm">エラー</div>`;}
 }
 
 function fetchAllPOI(){
@@ -198,78 +258,78 @@ function fetchAllPOI(){
   fetchPOI('node["amenity"="fuel"];way["amenity"="fuel"];','gs-list','⛽');
 }
 
-function checkUpdates(){
-  if(!lat||!lon)return;
-  const now=Date.now();
-  if(now-lastWeather>300000){lastWeather=now;fetchWeather();}   // 5分
-  if(now-lastAddr>60000){lastAddr=now;fetchAddr();}              // 60秒
-  if(now-lastPOI>30000){lastPOI=now;fetchAllPOI();}             // 30秒
-}
-
+/* ===== GPS ===== */
 function startGeo(){
   navigator.geolocation.watchPosition(p=>{
     const la=p.coords.latitude,lo=p.coords.longitude;
-    // 走行距離
     if(lat!==null&&lon!==null){
       const d=dst(lat,lon,la,lo);
-      if(d>0.005)totalDist+=d; // 5m以上移動したときだけ加算（ノイズ除去）
+      if(d>0.005)totalDist+=d;
     }
-    prevLat=lat;prevLon=lon;lat=la;lon=lo;
-    // 速度
+    lat=la;lon=lo;
     const spd=p.coords.speed!=null?Math.round(p.coords.speed*3.6):0;
-    document.getElementById('spd').textContent=spd;
-    document.getElementById('dist').textContent=totalDist.toFixed(1);
-    document.getElementById('acc').textContent=Math.round(p.coords.accuracy);
-    // 初回即時取得
-    if(lastWeather===0){
-      lastWeather=Date.now();lastAddr=Date.now();lastPOI=Date.now();
-      fetchWeather();fetchAddr();fetchAllPOI();
-    }
-  },err=>{
-    document.getElementById('addr').textContent='📡 位置情報エラー';
-  },{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+    $i('spd').textContent=spd;
+    $i('dist').textContent=totalDist.toFixed(1);
+    $i('acc').textContent=Math.round(p.coords.accuracy);
+    $i('coords').textContent=la.toFixed(3)+'/'+lo.toFixed(3);
+  },()=>{$i('addr').textContent='📡 位置情報エラー';},{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 }
 
+/* ===== コンパス ===== */
 function startCompass(){
   function onO(e){
-    let h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
-    document.getElementById('cn').style.transform=`rotate(${h}deg)`;
-    document.getElementById('cs').style.transform=`rotate(${h}deg)`;
-    document.getElementById('hdg').textContent=dl(h)+' '+Math.round(h)+'°';
+    const h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
+    $i('ndl-n').style.transform=`rotate(${h}deg)`;
+    $i('ndl-s').style.transform=`rotate(${h}deg)`;
+    $i('hdg').textContent=dl(h)+' '+Math.round(h)+'°';
   }
   window.addEventListener('deviceorientationabsolute',onO,true);
   window.addEventListener('deviceorientation',onO,true);
 }
 
-// 3秒タイマー
+/* ===== 毎秒タイマー ===== */
 function startTimer(){
+  // カウントダウン表示更新
+  const cdIds={
+    wx:['cd-wx','cd-sun'],
+    addr:['cd-addr'],
+    poi:['cd-st','cd-wc','cd-gs'],
+    fast:['cd-hdg','cd-elv','cd-spd','cd-dst','cd-acc']
+  };
   setInterval(()=>{
-    tick--;
-    document.getElementById('tmr').textContent='🔄'+tick;
-    if(tick<=0){tick=3;checkUpdates();}
+    // wx/sun: 300s
+    cd.wx--;if(cd.wx<=0){cd.wx=300;fetchWeather();}
+    cdIds.wx.forEach(id=>$i(id).textContent=cd.wx+'s');
+    // addr: 60s
+    cd.addr--;if(cd.addr<=0){cd.addr=60;fetchAddr();}
+    cdIds.addr.forEach(id=>$i(id).textContent=cd.addr+'s');
+    // poi: 30s
+    cd.poi--;if(cd.poi<=0){cd.poi=30;fetchAllPOI();}
+    cdIds.poi.forEach(id=>$i(id).textContent=cd.poi+'s');
+    // fast: 3s (GPS系は watchPosition で自動更新のためカウントダウン表示のみ)
+    cd.fast--;if(cd.fast<=0)cd.fast=3;
+    cdIds.fast.forEach(id=>$i(id).textContent=cd.fast+'s');
   },1000);
 }
 
+/* ===== スタート ===== */
 async function startApp(){
-  document.getElementById('permErr').style.display='none';
-  // 位置情報権限チェック
+  $i('permErr').style.display='none';
   if(!navigator.geolocation){
-    document.getElementById('permErr').textContent='このブラウザは位置情報非対応です';
-    document.getElementById('permErr').style.display='block';
-    return;
+    $i('permErr').textContent='このブラウザは位置情報非対応です';
+    $i('permErr').style.display='block';return;
   }
-  // 一度getCurrentPositionで権限ダイアログを起動
   navigator.geolocation.getCurrentPosition(()=>{
-    document.getElementById('perm').style.display='none';
-    document.getElementById('main').style.display='flex';
+    $i('perm').style.display='none';
+    $i('main').style.display='flex';
+    // 初回即時取得
+    fetchWeather();fetchAddr();fetchAllPOI();
     startGeo();
     startCompass();
     startTimer();
   },err=>{
-    let msg='位置情報の取得に失敗しました';
-    if(err.code===1)msg='位置情報の許可が必要です。ブラウザの設定を確認してください。';
-    document.getElementById('permErr').textContent=msg;
-    document.getElementById('permErr').style.display='block';
+    $i('permErr').textContent=err.code===1?'位置情報の許可が必要です。ブラウザ設定を確認してください。':'位置情報の取得に失敗しました。';
+    $i('permErr').style.display='block';
   },{enableHighAccuracy:true,timeout:15000});
 }
 </script>
