@@ -8,14 +8,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold !important; }
     body { color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; background-color: #000; }
     
-    /* 背景グラデーションアニメーション */
     @keyframes gradBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
     
-    /* 上半分(50vh)専用コンテナ */
     .dashboard {
       height: 50vh; width: 100vw; padding: 2px;
       display: flex; flex-direction: column; justify-content: space-between;
@@ -26,11 +24,9 @@
     }
     .bottom-space { height: 50vh; background: #000; }
 
-    /* 基本レイアウト枠 */
     .row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); border-radius: 4px; margin-bottom: 1px; padding: 1px 3px; }
     .flex-wrap { display: flex; align-items: center; gap: 4px; }
     
-    /* 視認性重視のコンパクトな太字フォント（vh/vwによる設計） */
     .txt-l { font-size: 2.3vh; }
     .txt-m { font-size: 1.7vh; }
     .txt-s { font-size: 1.3vh; color: #ccc; }
@@ -38,15 +34,12 @@
     .c-yellow { color: #ffeb3b; }
     .hide { display: none !important; }
     
-    /* カウントダウン・制御系 */
     .cd-badge { font-size: 1.0vh; background: #444; padding: 1px 2px; border-radius: 2px; color: #fff; margin-left: 2px; }
     .btn-ctrl { background: #333; color: #fff; border: 1px solid #fff; padding: 1px 4px; border-radius: 3px; font-size: 1.2vh; cursor: pointer; }
     .btn-ctrl.active { background: #ff5722; border-color: #ff5722; }
 
-    /* グリッド構成 */
     .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; text-align: center; width: 100%; }
     
-    /* リスト形式データ (POIs) */
     .poi-box { display: flex; flex-direction: column; gap: 1px; height: 44%; justify-content: space-between; }
     .poi-row { display: flex; align-items: stretch; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; flex: 1; min-height: 0; }
     .poi-icon { width: 7vw; display: flex; align-items: center; justify-content: center; font-size: 1.8vh; background: rgba(255,255,255,0.1); cursor: pointer; }
@@ -56,13 +49,66 @@
     
     .arrow { display: inline-block; transition: transform 0.2s linear; color: #00e676; }
 
-    /* 初期セットアップ画面 */
     .setup-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; gap: 20px; }
-    .setup-btn { background: #00e676; color: #000; border: none; padding: 4vw 8vw; font-size: 3.5vh; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,230,118,0.5); }
+    .setup-btn { background: #00e676; color: #000; border: none; padding: 4vw 8vw; font-size: 3.5vh; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,230,118,0.5); cursor: pointer; }
   </style>
 </head>
 <body>
 
   <div id="setup" class="setup-screen">
     <button class="setup-btn" onclick="startApp()">🏍️ Drive View5 開始</button>
-    <div style="
+    <div id="setup-status" style="color:#aaa; font-size:2vh; text-align:center; padding: 0 10px;">位置情報とコンパスの権限を許可してください。</div>
+  </div>
+
+  <div class="dashboard" id="dash" style="display:none;">
+    
+    <div class="row" style="height: 10%;" id="sec-top">
+      <div class="flex-wrap txt-l">
+        <span>🕒<span id="clock">--:--</span></span>
+        <span class="txt-m c-yellow" id="addr-zip">〒---</span>
+        <span class="txt-m ellipsis c-yellow" id="addr-det" style="max-width: 32vw;">取得中...</span>
+      </div>
+      <div class="flex-wrap">
+        <button class="btn-ctrl" id="eco-btn" onclick="toggleEcoMode()">🔋通常</button>
+        <button class="btn-ctrl" style="background:#00e676; color:#000;" onclick="triggerForceUpdate()">🔄一括</button>
+        <span class="cd-badge">⏱<span id="t-addr">60</span>s</span>
+      </div>
+    </div>
+
+    <div class="row txt-m c-yellow" style="height: 7%;" id="sec-road">
+      <div class="ellipsis" style="width: 50%;">🏢<span id="landmark">---</span></div>
+      <div class="ellipsis" style="width: 50%; text-align: right;">🛣️<span id="roadname">---</span></div>
+    </div>
+
+    <div class="row" style="height: 22%; flex-direction: column; justify-content: space-around;" id="sec-wea">
+      <div class="grid-5 txt-l" style="align-items: center;">
+        <div>🌡️<span id="temp">--</span><span class="txt-s">℃</span></div>
+        <div id="wea-ico" style="font-size:2.5vh;">⏳</div>
+        <div>☔<span id="precip" class="c-green">--</span><span class="txt-s">%</span></div>
+        <div class="txt-m">🌅<span id="s-rise">--:--</span><span class="arrow" id="ar-sr">↑</span></div>
+        <div class="txt-m">🌇<span id="s-set">--:--</span><span class="arrow" id="ar-ss">↑</span></div>
+      </div>
+      <div class="grid-5 txt-s" style="color: #00e676;">
+        <div>💨<span id="wind">--</span><span class="txt-s">m</span></div>
+        <div>💧<span id="humid">--</span><span class="txt-s">%</span></div>
+        <div>🌊<span id="wave">--</span><span class="txt-s">m</span></div>
+        <div>⎈<span id="press">--</span><span class="txt-s">hP</span></div>
+        <div>🌙<span id="moon">--</span></div>
+      </div>
+      <div style="width: 100%; text-align: right; margin-top: -5px;"><span class="cd-badge">⏱<span id="t-wea">300</span>s</span></div>
+    </div>
+
+    <div class="row" style="height: 17%;" id="sec-sens">
+      <div class="grid-5 txt-l" style="align-items: center; width: 92vw;">
+        <div class="ellipsis">🧭<span id="hd-str" style="font-size:1.8vh;">--</span><span id="hd-deg" class="c-green txt-m">--</span><span class="txt-s">°</span></div>
+        <div class="ellipsis">⛰️<span id="ele">--</span><span class="txt-s">m</span></div>
+        <div class="ellipsis">🏎️<span id="spd" class="c-green">0</span><span class="txt-s">k/h</span></div>
+        <div class="ellipsis">🛣️<span id="dist" class="c-green">0.0</span><span class="txt-s">km</span></div>
+        <div class="ellipsis" style="font-size:1.8vh;">🎯<span id="acc">--</span></div>
+      </div>
+      <span class="cd-badge">⏱<span id="t-sens">2</span>s</span>
+    </div>
+
+    <div class="poi-box" id="sec-pois">
+      <div class="poi-row" id="p-st"><div class="poi-icon" onclick="hideRow('p-st')">🚇</div><div class="poi-items" id="box-st"></div></div>
+      <div class="poi-row" id="p-tl"><div class="poi-icon" onclick="hideRow('p-tl')">🚻</div><div class="poi-items" id
