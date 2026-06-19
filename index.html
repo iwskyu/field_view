@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>便利view</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #000; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+    }
+    /* 画面上半分（50vh）専用ダッシュボード */
+    .dashboard {
+      height: 50vh; width: 100vw; padding: 10px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      background-color: #111; border-bottom: 3px solid #333;
+    }
+    /* 下半分は分割画面用に完全空白 */
+    .spacer-bottom { height: 50vh; background-color: #000; }
+    
+    /* レイアウト行 */
+    .row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    
+    .address-box {
+      font-size: 1.4rem; font-weight: bold; color: #ffeb3b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 85%;
+    }
+    .countdown { font-size: 1rem; color: #666; font-weight: bold; width: 15%; text-align: right; }
+    
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; font-size: 1.8rem; font-weight: bold; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-size: 1.5rem; font-weight: bold; }
+    
+    .poi-row { background: #222; border-radius: 8px; padding: 6px 12px; height: 14%; }
+    .poi-icon { font-size: 1.8rem; }
+    .poi-name { font-size: 1.3rem; font-weight: bold; max-width: 40%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+    .poi-meta { display: flex; align-items: center; gap: 12px; }
+    .poi-dist { font-size: 1.6rem; font-weight: bold; color: #00e676; }
+    
+    /* ナビ矢印（巨大化・超高視認性グリーン） */
+    .arrow { font-size: 2.3rem; display: inline-block; color: #00e676; transition: transform 0.1s linear; font-weight: bold; }
+    
+    /* スタート画面 */
+    .start-screen {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .start-btn {
+      background: #00e676; color: #000; border: none; padding: 25px 50px;
+      font-size: 2.2rem; font-weight: bold; border-radius: 15px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-screen" class="start-screen">
+    <button class="start-btn" onclick="startConvenientView()">便利view 開始</button>
+  </div>
+
+  <div class="dashboard" id="main-dashboard" style="display:none;">
+    
+    <div class="row" style="height: 12%;">
+      <div class="address-box">📍 <span id="addr">---</span></div>
+      <div class="countdown" id="sync-timer">10s</div>
+    </div>
+
+    <div class="grid-4" style="height: 14%; align-items: center;">
+      <div>🌡️<span id="temp">--</span>°</div>
+      <div><span id="weather-icon">⏳</span></div>
+      <div>⛰️<span id="ele">--</span>m</div>
+      <div>🧭<span id="heading">--</span>°</div>
+    </div>
+
+    <div class="grid-2" style="height: 14%; align-items: center; background: #1a1a1a; border-radius: 6px;">
+      <div>🌅 <span id="sunrise">--:--</span> <span class="arrow" id="sunrise-arrow" style="font-size:1.5rem;">↑</span></div>
+      <div>🌇 <span id="sunset">--:--</span> <span class="arrow" id="sunset-arrow" style="font-size:1.5rem;">↑</span></div>
+    </div>
+
+    <div class="row poi-row">
+      <span class="poi-icon">🚇</span>
+      <span class="poi-name" id="station-name">---</span>
+      <div class="poi-meta">
+        <span class="poi-dist" id="station-dist">--.-k</span>
+        <span class="arrow" id="station-arrow">↑</span>
+      </div>
+    </div>
+
+    <div class="row poi-row">
+      <span class="poi-icon">🚻</span>
+      <span class="poi-name" id="toilet-name">---</span>
+      <div class="poi-meta">
+        <span class="poi-dist" id="toilet-dist">--.-k</span>
+        <span class="arrow" id="toilet-arrow">↑</span>
+      </div>
+    </div>
+
+    <div class="row poi-row">
+      <span class="poi-icon">⛽</span>
+      <span class="poi-name" id="gas-name">---</span>
+      <div class="poi-meta">
+        <span class="poi-dist" id="gas-dist">--.-k</span>
+        <span class="arrow" id="gas-arrow">↑</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spacer-bottom"></div>
+
+  <script>
+    let currentLat = null, currentLon = null, currentHeading = 0;
+    let refreshTimer = 10;
+    let poiData = { station: null, toilet: null, gas: null };
+    let sunBearings = { sunrise: 90, sunset: 270 };
+
+    async function startConvenientView() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('main-dashboard').style.display = 'flex';
+
+      // コンパス権限取得（iOS対策）
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try { await DeviceOrientationEvent.requestPermission(); } catch (e) { console.error(e); }
+      }
+      window.addEventListener('deviceorientation', handleOrientation, true);
+
+      // 初回即時データ同期
+      await syncLocationAndData();
+
+      // 1秒ごとのカウントダウン管理＆10秒ごとのデータ自動更新ループ
+      setInterval(async () => {
+        refreshTimer--;
+        document.getElementById('sync-timer').textContent = refreshTimer + "s";
+        if (refreshTimer <= 0) {
+          refreshTimer = 10;
+          await syncLocationAndData();
+        }
+      }, 1000);
+    }
+
+    // 位置情報と各APIデータの統合同期（10秒毎に自動実行）
+    async function syncLocationAndData() {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        currentLat = pos.coords.latitude;
+        currentLon = pos.coords.longitude;
+
+        // 並行してデータを非同期取得
+        fetchAddress(currentLat, currentLon);
+        fetchWeatherAndElevation(currentLat, currentLon);
+        fetchNearbyPOIs(currentLat, currentLon);
+        calculateSunPositions(currentLat, currentLon);
+      }, (err) => {
+        document.getElementById('addr').textContent = "GPS Error";
+      }, { enableHighAccuracy: true });
+    }
+
+    // 1. 住所取得（スマートに短縮表示）
+    async function fetchAddress(lat, lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16`);
+        const data = await res.json();
+        const addr = data.address;
+        const shortAddr = (addr.city || addr.town || "") + (addr.suburb || addr.neighborhood || "") + (addr.road || "");
+        document.getElementById('addr').textContent = shortAddr || "日本";
+      } catch { document.getElementById('addr').textContent = "Error"; }
+    }
+
+    // 2. 気温・天気・標高・日の出日の没時間取得
+    async function fetchWeatherAndElevation(lat, lon) {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&elevation=nan&timezone=Asia%2FTokyo`);
+        const data = await res.json();
+        
+        document.getElementById('temp').textContent = Math.round(data.current_weather.temperature);
+        document.getElementById('ele').textContent = Math.round(data.elevation);
+        document.getElementById('weather-icon').textContent = getWeatherEmoji(data.current_weather.weathercode);
+        
+        const sunriseTime = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const sunsetTime = new Date(data.daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('sunrise').textContent = sunriseTime;
+        document.getElementById('sunset').textContent = sunsetTime;
+      } catch (e) { console.error(e); }
+    }
+
+    // 3. 実用周辺施設検索 (Overpass APIから現在地のリアルデータを爆速ビルド)
+    async function fetchNearbyPOIs(lat, lon) {
+      const query = `[out:json][timeout:5];(node["railway"="station"](around:5000,${lat},${lon});node["amenity"="toilets"](around:3000,${lat},${lon});node["amenity"="fuel"](around:8000,${lat},${lon}););out body;`;
+      try {
+        const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        
+        let stations = [], toilets = [], fuels = [];
+        data.elements.forEach(el => {
+          const d = calcDist(lat, lon, el.lat, el.lon);
+          const item = { name: el.tags.name || "---", lat: el.lat, lon: el.lon, dist: d };
+          if (el.tags.railway === 'station') stations.push(item);
+          else if (el.tags.amenity === 'toilets') toilets.push(item);
+          else if (el.tags.amenity === 'fuel') fuels.push(item);
+        });
+
+        poiData.station = stations.sort((a,b) => a.dist - b.dist)[0] || null;
+        poiData.toilet = toilets.sort((a,b) => a.dist - b.dist)[0] || null;
+        poiData.gas = fuels.sort((a,b) => a.dist - b.dist)[0] || null;
+
+        updatePOIDisplay();
+      } catch {
+        // オフラインまたはエラー時は簡易モック
+        if(!poiData.station) {
+          poiData.station = { name: "テスト駅", lat: lat + 0.01, lon: lon + 0.01, dist: 1.4 };
+          poiData.toilet = { name: "公衆トイレ", lat: lat - 0.003, lon: lon + 0.002, dist: 0.3 };
+          poiData.gas = { name: "GS", lat: lat + 0.005, lon: lon - 0.005, dist: 2.1 };
+          updatePOIDisplay();
+        }
+      }
+    }
+
+    // コンパス（デバイスの向き）処理
+    function handleOrientation(event) {
+      let heading = event.webkitCompassHeading || (event.alpha ? 360 - event.alpha : null);
+      if (heading !== null) {
+        currentHeading = heading;
+        document.getElementById('heading').textContent = Math.round(heading).toString().padStart(3, '0');
+        updatePOIDisplay();
+      }
+    }
+
+    // 各種施設＆日の出日没の画面表示と動的矢印の更新
+    function updatePOIDisplay() {
+      const targets = [
+        { id: 'station', data: poiData.station },
+        { id: 'toilet', data: poiData.toilet },
+        { id: 'gas', data: poiData.gas }
+      ];
+
+      targets.forEach(t => {
+        if (t.data && currentLat && currentLon) {
+          const d = calcDist(currentLat, currentLon, t.data.lat, t.data.lon);
+          const b = calcBearing(currentLat, currentLon, t.data.lat, t.data.lon);
+          document.getElementById(`${t.id}-name`).textContent = t.data.name;
+          document.getElementById(`${t.id}-dist`).textContent = d < 1 ? `${Math.round(d*1000)}m` : `${d.toFixed(1)}k`;
+          document.getElementById(`${t.id}-arrow`).style.transform = `rotate(${b - currentHeading}deg)`;
+        }
+      });
+
+      // 天体矢印の回転更新
+      document.getElementById('sunrise-arrow').style.transform = `rotate(${sunBearings.sunrise - currentHeading}deg)`;
+      document.getElementById('sunset-arrow').style.transform = `rotate(${sunBearings.sunset - currentHeading}deg)`;
+    }
+
+    // 太陽の日の出・日没絶対方位角の簡易計算
+    function calculateSunPositions(lat, lon) {
+      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+      const dec = 23.44 * Math.sin((360 / 365) * (dayOfYear - 80) * Math.PI / 180) * Math.PI / 180;
+      const cosAz = Math.sin(dec) / Math.cos(lat * Math.PI / 180);
+      const az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * 180 / Math.PI;
+      sunBearings.sunrise = az;
+      sunBearings.sunset = 360 - az;
+    }
+
+    // ハヴェルサイン距離計算(km)
+    function calcDist(la1, lo1, la2, lo2) {
+      const R = 6371;
+      const dLat = (la2 - la1) * Math.PI / 180, dLon = (lo2 - lo1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(la1*Math.PI/180) * Math.cos(la2*Math.PI/180) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // 絶対方位角計算
+    function calcBearing(la1, lo1, la2, lo2) {
+      const rLa1 = la1 * Math.PI / 180, rLa2 = la2 * Math.PI / 180, dLo = (lo2 - lo1) * Math.PI / 180;
+      return (Math.atan2(Math.sin(dLo) * Math.cos(rLa2), Math.cos(rLa1) * Math.sin(rLa2) - Math.sin(rLa1) * Math.cos(rLa2) * Math.cos(dLo)) * 180 / Math.PI + 360) % 360;
+    }
+
+    // WMO天気コードを絵文字にマッピング
+    function getWeatherEmoji(code) {
+      if (code === 0) return "☀️";
+      if ([1, 2, 3].includes(code)) return "⛅";
+      if ([45, 48].includes(code)) return "🌫️";
+      if ([51, 53, 55, 80, 81, 82].includes(code)) return "🌦️";
+      if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
+      if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+      if ([95, 96, 99].includes(code)) return "⚡";
+      return "⛅";
+    }
+  </script>
+</body>
+</html>
