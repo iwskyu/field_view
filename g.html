@@ -3,397 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drive View11</title>
+    <title>Drive View12</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #ffffff;
-            --accent-color: #00e5ff;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 10px;
         }
-        h1 {
-            color: var(--accent-color);
-            margin-bottom: 20px;
-        }
-        #permission-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center;
             z-index: 1000;
         }
-        .btn {
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
+        #start-btn {
+            font-size: 2rem; padding: 15px 40px; border-radius: 30px; border: none;
+            background: #00e676; color: black; font-weight: bold; cursor: pointer;
         }
         .container {
-            width: 100%;
-            max-width: 600px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 10px;
         }
         .card {
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: #1e1e1e; border-radius: 12px; padding: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; border: 1px solid #333;
         }
-        .card.full-width {
-            grid-column: span 2;
-        }
-        .label {
-            font-size: 0.85rem;
-            color: #aaa;
-            margin-bottom: 5px;
-        }
-        .value {
-            font-size: 1.4rem;
-            font-weight: bold;
-        }
-        .unit {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-left: 5px;
+        .full-width { grid-column: span 2; }
+        .icon { font-size: 1.8rem; margin-bottom: 4px; }
+        .value { font-size: 1.2rem; font-weight: bold; word-break: break-all; }
+        .sub-value { font-size: 0.9rem; color: #aaa; margin-top: 2px; width: 100%; }
+        .list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #2a2a2a; padding: 4px 8px; border-radius: 6px; margin-top: 4px; font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
-    <div id="permission-overlay">
-        <button class="btn" onclick="initApp()">Drive View11 を起動（位置情報許可）</button>
+    <div id="start-screen">
+        <button id="start-btn">▶ START</button>
     </div>
-
-    <h1>Drive View11</h1>
 
     <div class="container">
         <div class="card">
-            <div class="label">現在時刻</div>
-            <div id="current-time" class="value">--:--:--</div>
-        </div>
-        <div class="card">
-            <div class="label">気温・天気 (5分更新)</div>
-            <div id="weather" class="value">--℃ --</div>
-            <div id="pop" style="font-size:0.85rem; color:#aaa;">降水: --%</div>
-        </div>
-        <div class="card">
-            <div class="label">日の出・日没 (5分更新)</div>
-            <div id="sun-info" class="value" style="font-size:1.1rem;">出: -- / 没: --</div>
-            <div id="sun-direction" style="font-size:0.85rem; color:#aaa;">方角: --</div>
-        </div>
-        <div class="card">
-            <div class="label">気象詳細・月齢</div>
-            <div id="weather-detail" style="font-size:0.9rem; line-height: 1.4;">
-                風: <span id="wind">--</span>m | 湿: <span id="humidity">--</span>%<br>
-                波: <span id="wave">--</span>m | 圧: <span id="pressure">--</span>hPa<br>
-                月: <span id="moon">--</span>
-            </div>
-        </div>
-
-        <div class="card full-width">
-            <div class="label">現在地 郵便番号 (60秒更新)</div>
-            <div id="zipcode" class="value">〒--------</div>
-        </div>
-        <div class="card full-width">
-            <div class="label">住所詳細 (60秒更新)</div>
-            <div id="address" class="value" style="font-size:1.1rem;">位置情報取得中...</div>
-        </div>
-        <div class="card full-width">
-            <div class="label">建物名 / 最寄りランドマーク</div>
-            <div id="landmark" class="value" style="font-size:1.1rem;">--</div>
-        </div>
-        <div class="card full-width">
-            <div class="label">道路名</div>
-            <div id="road-name" class="value" style="font-size:1.1rem;">--</div>
+            <div class="icon">⏰</div>
+            <div id="time" class="value">--:--</div>
         </div>
 
         <div class="card">
-            <div class="label">方角 (2秒更新)</div>
-            <div id="heading" class="value">--°</div>
+            <div class="icon">🌤️</div>
+            <div id="weather" class="value">--℃ / --%</div>
         </div>
+
         <div class="card">
-            <div class="label">標高 (2秒更新)</div>
-            <div id="altitude" class="value">--<span class="unit">m</span></div>
+            <div class="icon">🌅🌇</div>
+            <div id="sun-info" class="value">--:-- / --:--</div>
         </div>
+
         <div class="card">
-            <div class="label">移動速度 (2秒更新)</div>
-            <div id="speed" class="value">--<span class="unit">km/h</span></div>
+            <div class="icon">💨💧🌊</div>
+            <div id="env-info" class="value">--</div>
         </div>
-        <div class="card">
-            <div class="label">本日の走行距離 (2秒更新)</div>
-            <div id="distance" class="value">0.00<span class="unit">km</span></div>
-        </div>
+
         <div class="card full-width">
-            <div class="label">GPS精度 (2秒更新)</div>
-            <div id="gps-accuracy" class="value">--</div>
+            <div class="icon">📍🏠</div>
+            <div id="address" class="value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🏢🛣️</div>
+            <div id="road-info" class="value">---</div>
+        </div>
+
+        <div class="card">
+            <div class="icon">🧭⛰️</div>
+            <div id="dir-alt" class="value">--° / --m</div>
+        </div>
+
+        <div class="card">
+            <div class="icon">⚡🛣️📶</div>
+            <div id="speed-trip" class="value">--km/h<br>--km (-- )</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🚉 (最寄り駅)</div>
+            <div id="stations" class="sub-value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🚾 (公衆トイレ)</div>
+            <div id="toilets" class="sub-value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">⛽ (GS)</div>
+            <div id="gas-stations" class="sub-value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🏪 (コンビニ)</div>
+            <div id="convenience" class="sub-value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🏪🛣️ (道の駅)</div>
+            <div id="michinoeki" class="sub-value">---</div>
+        </div>
+
+        <div class="card full-width">
+            <div class="icon">🗼 (ランドマーク)</div>
+            <div id="landmarks" class="sub-value">---</div>
         </div>
     </div>
 
     <script>
+        let currentLat = null;
+        let currentLon = null;
         let lastLat = null;
         let lastLon = null;
-        let totalDistance = 0;
-        let watchId = null;
+        let totalDistance = 0; // 本日の走行距離 (km)
 
-        // アプリ初期化（ボタン押下時）
-        function initApp() {
-            document.getElementById('permission-overlay').style.display = 'none';
-            
-            // クロック開始
-            startClock();
-            
-            // GPS監視開始 (高精度モード)
-            if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition(updateGPSMetrics, handleGPSError, {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                });
-                
-                // 定期実行タイマーの設定
-                setInterval(updateClockDependentData, 1000); // 1秒毎の内部チェック
-                // 初回即時取得用のダミー呼び出しはGPS座標確定後に行う
-            } else {
-                alert("お使いのブラウザは位置情報をサポートしていません。");
-            }
+        // 方角の数値から矢印・16方位に変換
+        function getDirectionEmoji(deg) {
+            if (deg === null || deg === undefined) return '❓';
+            const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+            const idx = Math.round(deg / 45) % 8;
+            const dirs = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
+            const dirIdx = Math.round(deg / 22.5) % 16;
+            return arrows[idx] + dirs[dirIdx];
         }
 
-        // 1. 時計（1秒毎更新）
-        function startClock() {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('current-time').innerText = now.toTimeString().split(' ')[0];
-            }, 1000);
-        }
-
-        // 2秒毎の更新基準（GPSのwatchPositionと間引きロジックで制御）
-        let last2SecUpdate = 0;
-        function updateGPSMetrics(position) {
-            const now = Date.now();
-            if (now - last2SecUpdate < 2000) return; // 2秒未満の頻繁な更新をスキップ
-            last2SecUpdate = now;
-
-            const coords = position.coords;
-            const currentLat = coords.latitude;
-            const currentLon = coords.longitude;
-
-            // 速度 (m/s から km/h)
-            if (coords.speed !== null && coords.speed >= 0) {
-                const speedKmH = (coords.speed * 3.6).toFixed(1);
-                document.getElementById('speed').innerHTML = `${speedKmH}<span class="unit">km/h</span>`;
-            } else {
-                document.getElementById('speed').innerHTML = `0.0<span class="unit">km/h</span>`;
-            }
-
-            // 標高
-            if (coords.altitude !== null) {
-                document.getElementById('altitude').innerHTML = `${Math.round(coords.altitude)}<span class="unit">m</span>`;
-            } else {
-                document.getElementById('altitude').innerHTML = `--<span class="unit">m</span>`;
-            }
-
-            // 方角
-            if (coords.heading !== null && !isNaN(coords.heading)) {
-                const dirStr = getDirectionString(coords.heading);
-                document.getElementById('heading').innerText = `${dirStr} ${Math.round(coords.heading)}°`;
-            } else {
-                document.getElementById('heading').innerText = `--°`;
-            }
-
-            // GPS精度
-            const acc = coords.accuracy;
-            let accStr = "低";
-            if (acc < 15) accStr = "高 (誤差15m未満)";
-            else if (acc < 50) accStr = "中 (誤差50m未満)";
-            document.getElementById('gps-accuracy').innerText = `${accStr} (${Math.round(acc)}m)`;
-
-            // 走行距離計算（ハバーシン公式）
-            if (lastLat !== null && lastLon !== null) {
-                const dist = haversineDistance(lastLat, lastLon, currentLat, currentLon);
-                // 軽微なGPSのブレ（時速0.5km相当以下）を排除
-                if (dist > 0.002) { 
-                    totalDistance += dist;
-                    document.getElementById('distance').innerHTML = `${totalDistance.toFixed(2)}<span class="unit">km</span>`;
-                }
-            }
-
-            // グローバル座標の更新と、初回データ取得のトリガー
-            if (lastLat === null) {
-                lastLat = currentLat;
-                lastLon = currentLon;
-                triggerPeriodicUpdates(); 
-            } else {
-                lastLat = currentLat;
-                lastLon = currentLon;
-            }
-        }
-
-        // 5分・60秒のタイマー管理用
-        let last5MinUpdate = 0;
-        let last60SecUpdate = 0;
-
-        function triggerPeriodicUpdates() {
-            const now = Date.now();
-            
-            // 60秒周期の処理
-            if (now - last60SecUpdate >= 60000 || last60SecUpdate === 0) {
-                last60SecUpdate = now;
-                fetchReverseGeocode(lastLat, lastLon);
-            }
-
-            // 5分周期の処理
-            if (now - last5MinUpdate >= 300000 || last5MinUpdate === 0) {
-                last5MinUpdate = now;
-                fetchWeatherData(lastLat, lastLon);
-                calculateAstronomy(lastLat, lastLon);
-            }
-        }
-
-        function updateClockDependentData() {
-            if (lastLat !== null && lastLon !== null) {
-                triggerPeriodicUpdates();
-            }
-        }
-
-        // 2点間の距離計算 (km)
-        function haversineDistance(lat1, lon1, lat2, lon2) {
+        // ハバースタイン公式による2点間の距離計算 (km)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                       Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 方角の数値表現を文字列に変換
-        function getDirectionString(heading) {
-            const directions = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', ' think西', '西', '西北西', '北西', '北北西'];
-            const index = Math.round(heading / 22.5) % 16;
-            const arrows = ['↑', '↗', '↗', '↗', '→', '↘', '↘', '↘', '↓', '↙', '↙', '↙', '←', '↖', '↖', '↖'];
-            return arrows[index] + directions[index];
+        // 簡易月齢計算 (簡易的なため誤差あり)
+        function getMoonPhase() {
+            const phases = ['新月', '繊月', '上弦', '十日夜', '待宵月', '満月', '十六夜', '下弦'];
+            const totalDays = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+            const age = (totalDays - 4) % 29.53; // 基準日からの簡易計算
+            const idx = Math.floor((age / 29.53) * 8) % 8;
+            return phases[idx];
         }
 
-        // 3. 気象データ取得 (Open-Meteoの無料APIを使用)
-        function fetchWeatherData(lat, lon) {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,pressure_msl,wind_speed_10m&timezone=Asia%2FTokyo`;
-            
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    const current = data.current;
-                    document.getElementById('weather').innerText = `${Math.round(current.temperature_2m)}℃ ${getWeatherText(current.weather_code)}`;
-                    document.getElementById('pop').innerText = `降水指標: ${current.precipitation}mm`;
-                    document.getElementById('wind').innerText = Math.round(current.wind_speed_10m);
-                    document.getElementById('humidity').innerText = current.relative_humidity_2m;
-                    document.getElementById('pressure').innerText = Math.round(current.pressure_msl);
-                    
-                    // 無料APIで取得が難しい固定/予測波浪のモック
-                    document.getElementById('wave').innerText = (1.5 + Math.random() * 2).toFixed(1);
-                })
-                .catch(() => {
-                    // オフライン・エラー時のフォールバック表示
-                    document.getElementById('weather').innerText = "25℃ 曇雨";
-                    document.getElementById('pop').innerText = "降水 30%";
-                    document.getElementById('wind').innerText = "9";
-                    document.getElementById('humidity').innerText = "30";
-                    document.getElementById('pressure').innerText = "1000";
-                    document.getElementById('wave').innerText = "3.5";
+        // 初期化処理の開始
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('start-screen').style.display = 'none';
+            initApp();
+        });
+
+        function initApp() {
+            // リアルタイムセンサー・GPS監視 (2秒毎のデータ更新を包含)
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(updateRealtimeLocation, handleLocationError, {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 10000
                 });
+            }
+
+            // デバイスの向き（コンパス）の取得
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientationabsolute', (e) => {
+                    if(e.alpha !== null) window.currentHeading = 360 - e.alpha;
+                }, true);
+            }
+
+            // タイマー管理
+            setInterval(updateTime, 1000); // 時刻は1秒
+            setInterval(updateLocation60s, 60000); // 郵便番号・住所
+            setInterval(updateLocation30s, 30000); // 周辺施設
+            setInterval(updateWeather5m, 300000); // 天気・環境
+
+            // 初回即時実行
+            updateTime();
         }
 
-        function getWeatherText(code) {
-            if (code === 0) return "晴れ";
-            if (code <= 3) return "晴れ/曇り";
-            if (code <= 48) return "霧";
-            if (code <= 67) return "雨/小雨";
-            if (code <= 77) return "雪";
-            return "雷雨・荒天";
-        }
-
-        // 4. 天体・潮汐計算 (ロジックによる簡易算出)
-        function calculateAstronomy(lat, lon) {
-            // 本来は複雑な天体幾何学が必要なため、固定値・簡易計算ロジック
-            document.getElementById('sun-info').innerText = "出: 04:50 / 没: 18:58";
-            document.getElementById('sun-direction').innerText = "↖ 南南西";
-            
-            // 月齢の簡易モック（周期29.5日）
-            const synodicMonth = 29.53;
-            const knownNewMoon = new Date('2026-01-18T00:00:00'); // 基準となる新月（2026年想定）
+        // 1. 現在時刻の更新
+        function updateTime() {
             const now = new Date();
-            const diffDays = (now - knownNewMoon) / (1000 * 60 * 60 * 24);
-            const age = diffDays % synodicMonth;
-            
-            let moonPhase = "中間の月";
-            if (age < 1.5 || age > 28) moonPhase = "新月";
-            else if (age >= 13.5 && age <= 15.5) moonPhase = "満月";
-            else if (age < 13.5) moonPhase = "上弦の月方面";
-            else moonPhase = "下弦の月方面";
-            
-            document.getElementById('moon').innerText = moonPhase;
+            document.getElementById('time').innerText = now.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
         }
 
-        // 5. 逆ジオコーディング (OSM OpenStreetMap / Nominatim の無料APIを使用)
-        function fetchReverseGeocode(lat, lon) {
-            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+        // 2秒毎更新エリア（GPS感知時に発火）
+        function updateRealtimeLocation(position) {
+            currentLat = position.coords.latitude;
+            currentLon = position.coords.longitude;
             
-            fetch(url, { headers: { 'User-Agent': 'DriveView11_App' } })
-                .then(res => res.json())
-                .then(data => {
+            // 走行距離の積算
+            if (lastLat !== null && lastLon !== null) {
+                const d = calculateDistance(lastLat, lastLon, currentLat, currentLon);
+                if (d > 0.005) { // 5m以上の移動を検知
+                    totalDistance += d;
+                }
+            }
+            lastLat = currentLat;
+            lastLon = currentLon;
+
+            // 速度、高度、精度
+            const speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
+            const altitude = position.coords.altitude ? Math.round(position.coords.altitude) : '--';
+            const accuracy = position.coords.accuracy < 15 ? '高' : (position.coords.accuracy < 40 ? '中' : '低');
+            
+            // 方角
+            let heading = position.coords.heading;
+            if (heading === null || isNaN(heading)) {
+                heading = window.currentHeading || 0;
+            }
+
+            // 描画
+            document.getElementById('dir-alt').innerHTML = `${getDirectionEmoji(heading)}<br>${altitude}m`;
+            document.getElementById('speed-trip').innerHTML = `${speed}km/h<br>${totalDistance.toFixed(2)}km (${accuracy})`;
+
+            // 初回ロード時のみ、位置確定後に即時各APIを叩く
+            if (!window.initialLoaded) {
+                updateLocation60s();
+                updateLocation30s();
+                updateWeather5m();
+                window.initialLoaded = true;
+            }
+        }
+
+        function handleLocationError(error) {
+            console.error("GPS Error:", error);
+        }
+
+        // 60秒毎更新エリア：住所、道路名、建物名
+        async function updateLocation60s() {
+            if (!currentLat || !currentLon) return;
+            try {
+                // Nominatim Reverse Geocoding
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLon}&accept-language=ja`);
+                const data = await res.json();
+                
+                if (data && data.address) {
                     const addr = data.address;
-                    if (!addr) return;
-
-                    // 郵便番号
-                    const postcode = addr.postcode ? `〒${addr.postcode}` : "〒150-0002 (推定)";
-                    document.getElementById('zipcode').innerText = postcode;
-
-                    // 住所詳細組み立て
-                    const state = addr.province || addr.state || "";
-                    const city = addr.city || addr.town || addr.city_district || "";
-                    const suburb = addr.suburb || addr.neighbourhood || "";
-                    const road = addr.road || "";
-                    const houseNum = addr.house_number || "";
+                    const zip = addr.postcode ? `〒${addr.postcode}` : '〒---';
+                    const state = addr.province || addr.prefecture || '';
+                    const city = addr.city || addr.ward || addr.town || '';
+                    const suburb = addr.suburb || addr.neighbourhood || '';
+                    const houseNumber = addr.house_number || '';
                     
-                    document.getElementById('address').innerText = `${state} ${city} ${suburb} ${houseNum}`.trim() || "日本国内";
+                    document.getElementById('address').innerHTML = `${zip}<br>${state}${city}${suburb}${houseNumber}`;
                     
-                    // 道路名
-                    document.getElementById('road-name').innerText = road || "一般道";
-
-                    // ランドマーク（OSMデータから抽出）
-                    const landmark = data.name || addr.attraction || addr.building || "付近の主要施設";
-                    document.getElementById('landmark').innerText = landmark;
-                })
-                .catch(() => {
-                    // APIエラー時のデモ用ダミー表示
-                    document.getElementById('zipcode').innerText = "〒150-0002";
-                    document.getElementById('address').innerText = "東京都 渋谷区 渋谷 1-23-16";
-                    document.getElementById('landmark').innerText = "東京タワー付近";
-                    document.getElementById('road-name').innerText = "国道17号 上尾線";
-                });
+                    const landmark = data.name || addr.building || addr.amenity || '---';
+                    const road = addr.road || '---';
+                    document.getElementById('road-info').innerHTML = `${landmark}<br>${road}`;
+                }
+            } catch (e) { console.error("60s Update Error:", e); }
         }
 
-        function handleGPSError(error) {
-            console.error("GPSエラー:", error);
-            document.getElementById('gps-accuracy').innerText = "エラー: 位置情報を取得できません";
+        // 5分毎更新エリア：天気・日の出日の入り・環境
+        async function updateWeather5m() {
+            if (!currentLat || !currentLon) return;
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,surface_pressure,wind_speed_10m&daily=sunrise,sunset&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+
+                if (data && data.current) {
+                    const cur = data.current;
+                    const wCode = cur.weather_code; // 簡易コード判別
+                    let wStr = "曇";
+                    if (wCode === 0) wStr = "晴";
+                    else if ([1,2,3].includes(wCode)) wStr = "晴曇";
+                    else if ([61,63,65,80,81,82].includes(wCode)) wStr = "雨";
+                    
+                    document.getElementById('weather').innerHTML = `${Math.round(cur.temperature_2m)}℃ ${wStr}<br>降水 ${cur.precipitation_probability}%`;
+
+                    // 環境情報
+                    const wind = Math.round(cur.wind_speed_10m);
+                    const hum = cur.relative_humidity_2m;
+                    const press = Math.round(cur.surface_pressure);
+                    const moon = getMoonPhase();
+                    // 波の高さは陸地APIに含まれないためダミー表記、または固定
+                    document.getElementById('env-info').innerHTML = `💨${wind}m 💧${hum}%<br>🎈${press}hPa 🌗${moon}`;
+
+                    // 日の出日没
+                    if(data.daily) {
+                        const rise = data.daily.sunrise[0].split('T')[1];
+                        const set = data.daily.sunset[0].split('T')[1];
+                        document.getElementById('sun-info').innerHTML = `🌅 ${rise}<br>🌇 ${set}`;
+                    }
+                }
+            } catch (e) { console.error("5m Update Error:", e); }
+        }
+
+        // 30秒毎更新エリア：Overpass APIを用いた周辺施設検索（3件制限）
+        async function updateLocation30s() {
+            if (!currentLat || !currentLon) return;
+            
+            // 各カテゴリーのクエリ定義
+            const types = {
+                stations: `node["railway"="station"](around:5000, ${currentLat}, ${currentLon});`,
+                toilets: `node["amenity"="toilet"](around:2000, ${currentLat}, ${currentLon});`,
+                gas-stations: `node["amenity"="fuel"](around:5000, ${currentLat}, ${currentLon});`,
+                convenience: `node["shop"="convenience"](around:2000, ${currentLat}, ${currentLon});`,
+                michinoeki: `node["tourism"="information"]["information"="map"](around:10000, ${currentLat}, ${currentLon});`, // 簡易代替
+                landmarks: `node["tourism"~"attraction|viewpoint|museum"](around:5000, ${currentLat}, ${currentLon});`
+            };
+
+            for (const [id, query] of Object.entries(types)) {
+                fetchOverpass(id, query);
+            }
+        }
+
+        async function fetchOverpass(elementId, queryTarget) {
+            const url = `https://overpass-api.de/api/interpreter?data=[out:json];${queryTarget}out body 5;`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const container = document.getElementById(elementId);
+                if (!container) return;
+
+                if (!data.elements || data.elements.length === 0) {
+                    container.innerHTML = "データなし";
+                    return;
+                }
+
+                // 距離順にソートして上位3件を抽出
+                let list = data.elements.map(el => {
+                    const dist = calculateDistance(currentLat, currentLon, el.lat, el.lon);
+                    // 方角計算
+                    const y = el.lat - currentLat;
+                    const x = el.lon - currentLon;
+                    const deg = (Math.atan2(x, y) * 180) / Math.PI;
+                    const heading = deg < 0 ? deg + 360 : deg;
+                    
+                    let name = el.tags.name || el.tags.brand || "名称不明";
+                    if (elementId === 'michinoeki' && el.tags.official_name) name = el.tags.official_name;
+                    
+                    return { name, dist, heading };
+                }).sort((a, b) => a.dist - b.dist).slice(0, 3);
+
+                container.innerHTML = list.map(item => `
+                    <div class="list-item">
+                        <span>${item.name.substring(0, 10)}</span>
+                        <span>${item.dist.toFixed(1)}km ${getDirectionEmoji(item.heading).substring(0,1)}</span>
+                    </div>
+                `).join('');
+
+            } catch (e) { console.error(`Overpass Error (${elementId}):`, e); }
         }
     </script>
 </body>
