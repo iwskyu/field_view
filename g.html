@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Drive View25</title>
+    <title>Drive View26</title>
     <style>
         :root {
-            --bg-grad-1: #0f172a;
-            --bg-grad-2: #1e293b;
-            --text-main: #f8fafc;
+            --bg-grad-1: #090d16;
+            --bg-grad-2: #151f32;
+            --text-main: #f1f5f9;
             --accent: #2563eb;
             --update-flash: #34d399;
         }
@@ -21,9 +21,9 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), #0f172a);
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), #090d16);
             background-size: 400% 400%;
-            animation: gradientAnim 20s ease infinite;
+            animation: gradientAnim 25s ease infinite;
             color: var(--text-main);
             font-weight: bold;
             overflow-x: hidden;
@@ -36,11 +36,10 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 初期オーバーレイ */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.98);
+            background: rgba(9, 13, 22, 0.98);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -51,7 +50,7 @@
             text-align: center;
         }
         #start-btn {
-            padding: 18px 36px;
+            padding: 16px 32px;
             font-size: 18px;
             font-weight: bold;
             background: var(--accent);
@@ -61,40 +60,33 @@
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(37, 99, 233, 0.4);
         }
-        .notice {
-            font-size: 11px;
-            color: #94a3b8;
-            font-weight: normal;
-        }
 
-        /* メインコンテナ（上半分に収めるコンパクト設計） */
         .container {
             width: 100%;
             max-height: 55vh;
-            padding: 4px;
+            padding: 2px;
             position: relative;
         }
 
-        /* ヘッダー */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 2px 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        .title { font-size: 13px; color: #94a3b8; }
+        .title { font-size: 12px; color: #94a3b8; }
+        
         #sync-btn {
-            background: #334155;
+            background: #1e293b;
             border: 1px solid #475569;
             color: white;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             font-size: 10px;
             cursor: pointer;
         }
 
-        /* 省スペースグリッド */
         .grid-row {
             display: flex;
             gap: 2px;
@@ -102,14 +94,15 @@
         }
 
         .card {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 3px;
-            padding: 3px 5px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 2px;
+            padding: 3px 4px;
             flex: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            gap: 4px;
             transition: border-color 0.4s ease, color 0.4s ease;
             white-space: nowrap;
             overflow: hidden;
@@ -126,18 +119,12 @@
             color: var(--update-flash) !important;
         }
 
-        .cd {
-            font-size: 8px;
-            color: #64748b;
-            margin-left: 3px;
-            font-weight: normal;
-        }
-
         .list-box {
             font-size: 9.5px;
-            width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
         }
         
         .list-item {
@@ -152,170 +139,144 @@
 <body>
 
     <div id="overlay">
-        <button id="start-btn">Drive View25 起動</button>
-        <p class="notice">※コンパス・位置情報センサーの権限許可ダイアログが出た場合は、「許可」を選択してください。<br>（必ずHTTPS環境で開いてください）</p>
+        <button id="start-btn">Drive View26 起動</button>
     </div>
 
     <div class="container">
         <div class="header">
-            <span class="title">🚗 Drive View25</span>
+            <span class="title">🚗 Drive View26</span>
             <button id="sync-btn">🔄一括更新</button>
         </div>
 
         <div class="grid-row">
-            <div class="card full-width" id="c-time">
-                <span>🕒 <span id="val-time">--:--:--</span></span>
-                <span class="cd">REALTIME</span>
-            </div>
-        </div>
-
-        <div class="grid-row">
             <div class="card full-width" id="c-weather">
-                <span>🌈 <span id="val-weather">計測中...</span></span>
-                <span class="cd">⏳<span id="cd-weather">220</span>s</span>
+                <span>🕒 <span id="val-time">--:--</span></span>
+                <span>🌈 <span id="val-weather">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-sun">
-                <span>🌅 <span id="val-sun">計測中...</span></span>
-                <span class="cd">⏳<span id="cd-sun">1200</span>s</span>
+                <span>🌅 <span id="val-sun">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-env">
-                <span>💨 <span id="val-env">計測中...</span></span>
-                <span class="cd">⏳<span id="cd-env">300</span>s</span>
+                <span>💨 <span id="val-env">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card" id="c-heading">
-                <span>🧭 <span id="val-heading">測定中...</span></span>
-                <span class="cd">⏳<span id="cd-heading">3</span>s</span>
+                <span>🧭 <span id="val-heading">⏳...</span></span>
             </div>
             <div class="card" id="c-motion">
-                <span>⛰️ <span id="val-altitude">測定中...</span> | 🚀 <span id="val-speed">0km/h</span></span>
-                <span class="cd">⏳<span id="cd-motion">3</span>s</span>
+                <span>⛰️ <span id="val-altitude">⏳...</span></span>
+                <span>🚀 <span id="val-speed">0 km/h</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-address">
-                <span>📍 <span id="val-address">位置情報取得中...</span></span>
-                <span class="cd">⏳<span id="cd-address">120</span>s</span>
+                <span>📍 <span id="val-address">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-geo-spot">
-                <span>🏢 <span id="val-landmark">--</span> | 🛣️ <span id="val-cross">--</span></span>
-                <span class="cd">⏳<span id="cd-geo-spot">120</span>s</span>
+                <span>🏢 <span id="val-landmark">--</span></span>
+                <span>🛣️ <span id="val-cross">--</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-poi-cvs">
-                <span>🏪 <span id="val-cvs" class="list-box">検索中...</span></span>
-                <span class="cd">⏳<span id="cd-poi-cvs">150</span>s</span>
+                <span>🏪 <span id="val-cvs" class="list-box">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-poi-station">
-                <span>🚃 <span id="val-station" class="list-box">検索中...</span></span>
-                <span class="cd">⏳<span id="cd-poi-station">150</span>s</span>
+                <span>🚃 <span id="val-station" class="list-box">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-poi-gas">
-                <span>⛽ <span id="val-gas" class="list-box">検索中...</span></span>
-                <span class="cd">⏳<span id="cd-poi-gas">150</span>s</span>
+                <span>⛽ <span id="val-gas" class="list-box">⏳...</span></span>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="card full-width" id="c-poi-toilet">
-                <span>🚾 <span id="val-toilet" class="list-box">検索中...</span></span>
-                <span class="cd">⏳<span id="cd-poi-toilet">150</span>s</span>
+                <span>🚾 <span id="val-toilet" class="list-box">⏳...</span></span>
             </div>
         </div>
     </div>
 
     <script>
-        let lat = null, lon = null, heading = 0;
+        let lat = null, lon = null, lastLat = null, lastLon = null;
+        let heading = 0;
+        let sensorActive = false;
+        let initialPoiFetched = false; // 初回POI取得完了判定フラグ
         
         const INTERVALS = { 
-            weather: 220, 
-            sun: 1200, 
-            env: 300, 
-            heading: 3, 
-            motion: 3, 
-            address: 120, 
-            geo_spot: 120, 
-            poi_cvs: 150, 
-            poi_station: 150, 
-            poi_gas: 150, 
-            poi_toilet: 150 
+            weather: 220, sun: 1200, env: 300, address: 120, geo_spot: 120, 
+            poi_cvs: 150, poi_station: 150, poi_gas: 150, poi_toilet: 150 
         };
-        let countdowns = { ...INTERVALS };
+        let timers = { ...INTERVALS };
 
         const DIR_ARROWS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
         const DIR_NAMES = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西北西', '西', '西北西', '北西', '北北西'];
 
-        // 起動ボタンイベント（ここで各種デバイス権限を明示的に要求）
-        document.getElementById('start-btn').addEventListener('click', async () => {
+        document.getElementById('start-btn').addEventListener('click', function() {
             document.getElementById('overlay').style.display = 'none';
             
-            // iOS等のためのデバイスセンサー権限要求
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            setTimeout(async () => {
                 try {
-                    const permissionState = await DeviceOrientationEvent.requestPermission();
-                    if (permissionState === 'granted') {
-                        window.addEventListener('deviceorientationabsolute', updateHeading, true);
+                    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        const state = await DeviceOrientationEvent.requestPermission();
+                        if (state === 'granted') activateCompass();
                     } else {
-                        document.getElementById('val-heading').innerText = '方位権限拒否';
+                        activateCompass();
                     }
-                } catch (error) {
-                    console.error('権限要求エラー:', error);
-                    // フォールバック（Android等）
-                    window.addEventListener('deviceorientationabsolute', updateHeading, true);
-                    window.addEventListener('deviceorientation', updateHeading, true);
+                } catch (e) {
+                    console.log('センサー権限要求スキップ:', e);
+                    activateCompass();
                 }
-            } else {
-                // 通常ブラウザ（iOS13未満、多くのAndroid）
+                initApp();
+            }, 10);
+        });
+
+        function activateCompass() {
+            try {
                 window.addEventListener('deviceorientationabsolute', updateHeading, true);
                 window.addEventListener('deviceorientation', updateHeading, true);
-            }
-
-            initApp();
-        });
+            } catch(e) { console.error(e); }
+        }
 
         document.getElementById('sync-btn').addEventListener('click', () => {
             triggerAllUpdates();
         });
 
         function initApp() {
-            // 1. リアルタイム時計
             setInterval(() => {
                 const now = new Date();
-                document.getElementById('val-time').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                document.getElementById('val-time').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }, 1000);
 
-            // 2. 位置情報監視 (高精度モードを設定)
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(updateLocation, handleError, {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 8000,
                     maximumAge: 0
                 });
             } else {
-                document.getElementById('val-address').innerText = 'GPS非対応端末';
+                document.getElementById('val-address').innerText = 'GPS非対応';
             }
 
-            startCountdowns();
+            startAppTimers();
             triggerAllUpdates();
         }
 
@@ -323,59 +284,81 @@
             lat = position.coords.latitude;
             lon = position.coords.longitude;
             
-            if(countdowns.motion <= 0 || document.getElementById('val-altitude').innerText === '測定中...') {
-                // 標高データ（GPS受信状況によりnullが返ることが多いため、代替として0m表示か精度の補正を行う）
-                let alt = '0m(不正確)';
-                if (position.coords.altitude !== null) {
-                    alt = Math.round(position.coords.altitude) + 'm';
-                } else if (position.coords.accuracy > 30) {
-                    alt = '測位精度不足';
-                }
-                
-                const speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
-                
-                document.getElementById('val-altitude').innerText = alt;
-                document.getElementById('val-speed').innerText = speed + 'km/h';
-                flashCard('c-motion');
-                countdowns.motion = INTERVALS.motion;
+            // GPSの有効な緯度経度をしっかり補足した段階で、まだPOIの初回検索が完了していなければ自動リトライ
+            if (lat && lon && !initialPoiFetched) {
+                initialPoiFetched = true;
+                fetchPOIs();
             }
+
+            if (!sensorActive && position.coords.heading !== null && position.coords.heading !== undefined && !isNaN(position.coords.heading)) {
+                heading = Math.round(position.coords.heading);
+                renderHeadingUI();
+            } else if (!sensorActive && lastLat !== null && lastLon !== null) {
+                const dLon = (lon - lastLon) * Math.PI / 180;
+                const lat1 = lastLat * Math.PI / 180;
+                const lat2 = lat * Math.PI / 180;
+                const y = Math.sin(dLon) * Math.cos(lat2);
+                const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+                let gpsHeading = Math.atan2(y, x) * 180 / Math.PI;
+                gpsHeading = (gpsHeading + 360) % 360;
+                
+                if (getDistance(lastLat, lastLon, lat, lon) > 0.002) { 
+                    heading = Math.round(gpsHeading);
+                    renderHeadingUI();
+                }
+            }
+            
+            lastLat = lat;
+            lastLon = lon;
+
+            let alt = '0m(低精度)';
+            if (position.coords.altitude !== null && position.coords.altitude !== undefined) {
+                alt = Math.round(position.coords.altitude) + 'm';
+            }
+            const speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
+            
+            document.getElementById('val-altitude').innerText = alt;
+            document.getElementById('val-speed').innerText = speed + ' km/h';
+            flashCard('c-motion');
         }
 
         function updateHeading(event) {
             let currentHeading = null;
-            
-            if (event.webkitCompassHeading) {
-                currentHeading = event.webkitCompassHeading; // iOS用
-            } else if (event.absolute && event.alpha !== null) {
-                currentHeading = 360 - event.alpha; // Android絶対方位用
-            } else if (event.alpha !== null) {
-                currentHeading = 360 - event.alpha; // 標準フォールバック
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                currentHeading = event.webkitCompassHeading;
+                sensorActive = true;
+            } else if (event.absolute === true && event.alpha !== null) {
+                currentHeading = 360 - event.alpha;
+                sensorActive = true;
+            } else if (event.alpha !== null && !sensorActive) {
+                currentHeading = 360 - event.alpha;
             }
 
-            if (currentHeading !== null) {
+            if (currentHeading !== null && !isNaN(currentHeading)) {
                 heading = Math.round(currentHeading);
-                if(countdowns.heading <= 0) {
-                    const idx = Math.round(heading / 22.5) % 16;
-                    document.getElementById('val-heading').innerText = `${DIR_NAMES[idx]} ${heading}°`;
-                    flashCard('c-heading');
-                    countdowns.heading = INTERVALS.heading;
-                }
+                renderHeadingUI();
             }
         }
 
+        function renderHeadingUI() {
+            const idx = Math.round(heading / 22.5) % 16;
+            const arrowIdx = Math.round(heading / 45) % 8;
+            const arrow = DIR_ARROWS[arrowIdx];
+            const marker = sensorActive ? "" : "🚗";
+            document.getElementById('val-heading').innerText = `${arrow}${DIR_NAMES[idx]} ${heading}°${marker}`;
+            flashCard('c-heading');
+        }
+
         function handleError(err) {
-            console.warn(`Geolocation Error(${err.code}): ${err.message}`);
-            if(err.code === 1) {
-                document.getElementById('val-address').innerText = '位置情報が拒否されました';
-            }
+            console.warn(`GPS取得エラー(${err.code})`);
         }
 
         function getBearingArrow(lat1, lon1, lat2, lon2) {
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const lat1Rad = lat1 * Math.PI / 180;
-            const lat2Rad = lat2 * Math.PI / 180;
-            const y = Math.sin(dLon) * Math.cos(lat2Rad);
-            const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+            const l1 = lat1 * Math.PI / 180;
+            const l2 = lat2 * Math.PI / 180;
+            const y = Math.sin(dLon) * Math.cos(l2);
+            const x = Math.cos(l1) * Math.sin(l2) - Math.sin(l1) * Math.cos(l2) * Math.cos(dLon);
             let brng = Math.atan2(y, x) * 180 / Math.PI;
             brng = (brng + 360) % 360;
             
@@ -393,7 +376,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        async function fetchWeather() {
+        async function fetchWeatherAndEnv() {
             if (!lat || !lon) return;
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,pressure_msl,wind_speed_10m&hourly=precipitation_probability&forecast_days=1`);
@@ -401,8 +384,10 @@
                 const cur = data.current;
                 const pop = data.hourly ? data.hourly.precipitation_probability[new Date().getHours()] : 0;
                 
-                let wText = "晴"; if(cur.weather_code > 3) wText = "曇"; if(cur.weather_code > 50) wText = "雨";
-                
+                let wText = "晴";
+                if(cur.weather_code > 3 && cur.weather_code <= 50) wText = "曇";
+                if(cur.weather_code > 50) wText = "曇雨";
+
                 document.getElementById('val-weather').innerText = `${wText} ${Math.round(cur.temperature_2m)}℃ 降水${pop}%、${Math.round(cur.precipitation)}mm`;
                 document.getElementById('val-env').innerText = `${Math.round(cur.wind_speed_10m)}m、💧${cur.relative_humidity_2m}%、🎈${Math.round(cur.pressure_msl)}hPa`;
                 
@@ -422,12 +407,12 @@
                 const sArrow = getBearingArrow(lat, lon, lat, lon + 0.1);
                 const eArrow = getBearingArrow(lat, lon, lat, lon - 0.1);
 
-                document.getElementById('val-sun').innerText = `出:${sTime}(${sArrow}東) 没:${eTime}(${eArrow}西)`;
+                document.getElementById('val-sun').innerText = `${sTime}(${sArrow}東) 没:${eTime}(${eArrow}西)`;
                 flashCard('c-sun');
             } catch (e) { console.error(e); }
         }
 
-        async function fetchAddress() {
+        async function fetchAddressAndSpots() {
             if (!lat || !lon) return;
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
@@ -443,7 +428,7 @@
                 
                 document.getElementById('val-address').innerText = `${pc} ${state}${city}${road} ${houseNum}`;
                 document.getElementById('val-landmark').innerText = data.name || addr.building || '付近の建物';
-                document.getElementById('val-cross').innerText = addr.suburb || '主要交差点付近';
+                document.getElementById('val-cross').innerText = addr.quarter || addr.suburb || '主要交差点付近';
 
                 flashCard('c-address');
                 flashCard('c-geo-spot');
@@ -463,8 +448,14 @@
                 try {
                     const query = `[out:json];node${filter}(around:3000,${lat},${lon});out;`;
                     const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-                    const data = await res.json();
                     
+                    // API制限(429)やエラーが返った場合は「検索中...」に戻して次回の定期更新に委ねる
+                    if (res.status === 429) {
+                        document.getElementById(`val-${key}`).innerHTML = '⏳アクセス制限中(自動再試行します)';
+                        continue;
+                    }
+                    
+                    const data = await res.json();
                     let elements = data.elements || [];
                     
                     elements.forEach(el => {
@@ -478,8 +469,9 @@
                     if(top3.length > 0) {
                         top3.forEach(el => {
                             let name = el.tags.name || '名称不明';
-                            if(key === 'station' && el.tags.operator) {
-                                name = `${el.tags.operator} ${name}`;
+                            if(key === 'station') {
+                                const line = el.tags.operator || el.tags.line || '';
+                                name = line ? `${line} ${name}` : name;
                             }
                             html += `<span class="list-item">${name} ${el.distance.toFixed(1)}km ${el.arrow}</span>`;
                         });
@@ -488,7 +480,10 @@
                     }
                     document.getElementById(`val-${key}`).innerHTML = html;
                     flashCard(`c-poi-${key}`);
-                } catch (e) { console.error(`POI error (${key}):`, e); }
+                } catch (e) { 
+                    console.error(e);
+                    document.getElementById(`val-${key}`).innerHTML = '⚠️通信エラー(再試行中)';
+                }
             }
         }
 
@@ -500,26 +495,25 @@
             }
         }
 
-        function startCountdowns() {
+        function startAppTimers() {
             setInterval(() => {
-                for (const key in countdowns) {
-                    if (countdowns[key] > 0) {
-                        countdowns[key]--;
-                        const cdEl = document.getElementById(`cd-${key}`);
-                        if (cdEl) cdEl.innerText = countdowns[key];
+                for (const key in timers) {
+                    if (timers[key] > 0) {
+                        timers[key]--;
                     } else {
-                        triggerSingleUpdate(key);
+                        executeTargetUpdate(key);
                     }
                 }
             }, 1000);
         }
 
-        function triggerSingleUpdate(key) {
+        function executeTargetUpdate(key) {
             if (!lat || !lon) return;
-            if (['weather', 'env'].includes(key)) { fetchWeather(); countdowns.weather = INTERVALS.weather; countdowns.env = INTERVALS.env; }
-            if (key === 'sun') { fetchSun(); countdowns.sun = INTERVALS.sun; }
-            if (['address', 'geo_spot'].includes(key)) { fetchAddress(); countdowns.address = INTERVALS.address; countdowns.geo_spot = INTERVALS.geo_spot; }
-            if (key.startsWith('poi_')) { fetchPOIs(); countdowns.poi_cvs = INTERVALS.poi_cvs; countdowns.poi_station = INTERVALS.poi_station; countdowns.poi_gas = INTERVALS.poi_gas; countdowns.poi_toilet = INTERVALS.poi_toilet; }
+            if (key === 'weather') { fetchWeatherAndEnv(); timers.weather = INTERVALS.weather; }
+            if (key === 'sun') { fetchSun(); timers.sun = INTERVALS.sun; }
+            if (key === 'env') { fetchWeatherAndEnv(); timers.env = INTERVALS.env; }
+            if (key === 'address' || key === 'geo_spot') { fetchAddressAndSpots(); timers.address = INTERVALS.address; timers.geo_spot = INTERVALS.geo_spot; }
+            if (key.startsWith('poi_')) { fetchPOIs(); timers.poi_cvs = INTERVALS.poi_cvs; timers.poi_station = INTERVALS.poi_station; timers.poi_gas = INTERVALS.poi_gas; timers.poi_toilet = INTERVALS.poi_toilet; }
         }
 
         function triggerAllUpdates() {
@@ -530,11 +524,11 @@
                 }, handleError, {enableHighAccuracy: true});
                 return;
             }
-            fetchWeather();
+            fetchWeatherAndEnv();
             fetchSun();
-            fetchAddress();
+            fetchAddressAndSpots();
             fetchPOIs();
-            for (const key in countdowns) countdowns[key] = INTERVALS[key];
+            for (const key in timers) timers[key] = INTERVALS[key];
         }
     </script>
 </body>
