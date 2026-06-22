@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旅のお供 ver50</title>
+    <title>旅のお供 ver51</title>
     <style>
         :root {
             --bg-1: #020617;
             --bg-2: #0f172a;
             --bg-3: #1e1b4b;
             --b-white: #ffffff;
-            --b-brown: #92400e;
             --b-red: #ef4444;
             --b-orange: #f97316;
             --b-yellow: #eab308;
@@ -59,21 +58,21 @@
         }
 
         #startBtn {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            padding: 20px 45px;
+            padding: 18px 40px;
             color: #ffffff;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 30px rgba(139, 92, 246, 0.5);
-            margin-bottom: 24px;
+            box-shadow: 0 4px 25px rgba(139, 92, 246, 0.5);
+            margin-bottom: 20px;
         }
 
         #overlay p {
             color: #94a3b8;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             text-align: center;
             line-height: 1.6;
@@ -85,34 +84,34 @@
             min-height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 6px;
+            padding: 4px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 50px;
-            padding: 0 6px;
+            height: 45px;
+            padding: 0 4px;
         }
 
         header h1 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
         }
 
         .controls {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #ffffff;
-            padding: 7px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
         }
@@ -122,46 +121,46 @@
             border-color: #b91c1c;
         }
 
-        /* 共通タイルスタイル */
+        /* 共通タイルスタイル（縦幅を狭く最適化） */
         .tile {
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(10px);
-            border: 2.5px solid transparent;
-            border-radius: 10px;
-            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            padding: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            transition: border-color 0.5s, color 0.5s;
+            transition: border-color 0.4s, color 0.4s;
         }
 
         /* 前半：1列に4タイル表示エリア */
         .grid-4col {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 4px;
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .grid-4col .tile {
-            min-height: 95px;
+            min-height: 68px; /* 縦幅を狭く設定 */
         }
 
         /* 後半：横いっぱいのリスト状表示エリア */
         .list-vertical {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             width: 100%;
-            padding-bottom: 30px;
+            padding-bottom: 20px;
         }
         .list-vertical .tile {
             width: 100%;
-            min-height: 65px;
+            min-height: 42px; /* リストも縦幅を狭く設定 */
             justify-content: flex-start;
             text-align: left;
-            padding: 12px 16px;
+            padding: 6px 12px;
         }
 
         /* カラー枠線定義 */
@@ -176,7 +175,7 @@
         .w-purple { border-color: var(--b-purple); color: var(--b-purple); }
         .w-pink { border-color: var(--b-pink); color: var(--b-pink); }
 
-        /* 更新時のフラッシュ */
+        /* 更新時の水色フラッシュ */
         .tile.updated {
             border-color: var(--updated-color) !important;
             color: var(--updated-color) !important;
@@ -189,8 +188,8 @@
             word-break: break-all;
             white-space: normal;
             display: inline-block;
-            font-size: calc(0.55rem + 0.45vw);
-            line-height: 1.4;
+            font-size: calc(0.52rem + 0.48vw);
+            line-height: 1.25;
         }
         .grid-4col .tile-text {
             text-align: center;
@@ -200,13 +199,13 @@
 <body>
 
     <div id="overlay">
-        <button id="startBtn" onclick="activateTools()">旅のお供 ver50 を起動</button>
+        <button id="startBtn" onclick="activateTools()">旅のお供 ver51 を起動</button>
         <p>※GPS位置情報とマイクを使用して情報を表示します。</p>
     </div>
 
     <div class="app-container">
         <header>
-            <h1>旅のお供 ver50</h1>
+            <h1>旅のお供 ver51</h1>
             <div class="controls">
                 <button class="btn" onclick="forceRefreshAll()">🔄一括更新</button>
                 <button class="btn" id="stopBtn" onclick="toggleLoopControl()">⏹️自動更新停止</button>
@@ -240,7 +239,7 @@
             <div class="tile w-lime" id="t-star"><span class="tile-text">🌌星空指数<br>-</span></div>
             <div class="tile w-green" id="t-pm25"><span class="tile-text">🌫️PM2.5<br>-</span></div>
             <div class="tile w-green" id="t-kosa"><span class="tile-text">⏳️黄砂<br>-</span></div>
-            <div class="tile w-green" id="t-pollen"><span class="tile-text">🌲花粉情報<br>-</span></div>
+            <div class="tile w-green" id="t-pollen"><span class="tile-text">🌲花粉<br>-</span></div>
             <div class="tile w-emerald" id="t-eq"><span class="tile-text">⚠️地震情報<br>-</span></div>
             <div class="tile w-blue" id="t-wc1"><span class="tile-text">🚾トイレ1<br>-</span></div>
             <div class="tile w-blue" id="t-wc2"><span class="tile-text">🚾トイレ2<br>-</span></div>
@@ -250,14 +249,14 @@
             <div class="tile w-blue" id="t-spa2"><span class="tile-text">♨️温泉2<br>-</span></div>
             <div class="tile w-blue" id="t-wifi1"><span class="tile-text">📶無料Wi-Fi1<br>-</span></div>
             <div class="tile w-blue" id="t-wifi2"><span class="tile-text">📶無料Wi-Fi2<br>-</span></div>
-            <div class="tile w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難所1<br>-</span></div>
-            <div class="tile w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難所2<br>-</span></div>
+            <div class="tile w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難1<br>-</span></div>
+            <div class="tile w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難2<br>-</span></div>
             <div class="tile w-blue" id="t-gs1"><span class="tile-text">⛽ガソリン1<br>-</span></div>
             <div class="tile w-blue" id="t-gs2"><span class="tile-text">⛽ガソリン2<br>-</span></div>
             <div class="tile w-blue" id="t-pk1"><span class="tile-text">🅿️駐車場1<br>-</span></div>
             <div class="tile w-blue" id="t-pk2"><span class="tile-text">🅿️駐車場2<br>-</span></div>
-            <div class="tile w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路情報1<br>-</span></div>
-            <div class="tile w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路情報2<br>-</span></div>
+            <div class="tile w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路1<br>-</span></div>
+            <div class="tile w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路2<br>-</span></div>
         </main>
 
         <section class="list-vertical">
@@ -452,8 +451,8 @@
                     let addr = res.address;
                     let zip = addr.postcode ? `〒${addr.postcode}` : "〒-";
                     let name = (addr.province || addr.state || "") + (addr.city || addr.ward || addr.town || "") + (addr.suburb || addr.road || "");
-                    pushUpdateView('t-addr', `🗺️現在地：${zip} ${name || "-"}`);
-                }).catch(() => { pushUpdateView('t-addr', `🗺️現在地：-`); });
+                    pushUpdateView('t-addr', `🗺️現在地：<br>${zip} ${name || "-"}`);
+                }).catch(() => { pushUpdateView('t-addr', `🗺️現在地：<br>-`); });
             }
         }
 
@@ -476,7 +475,7 @@
                         minDist = dNum; closestName = g.name; targetAngle = m.angle;
                     }
                 });
-                pushUpdateView('t-gov', `🏢県庁所在地<br>${closestName}：${getRelativeArrow(targetAngle)}${minDist.toFixed(1)}km`);
+                pushUpdateView('t-gov', `🏢県庁所在地<br>${closestName}<br>${getRelativeArrow(targetAngle)}${minDist.toFixed(1)}km`);
 
                 executeOverpassAndWikiExtraction();
             }
@@ -492,18 +491,18 @@
 
                     let prob = res.hourly.precipitation_probability[0];
                     let vol = res.hourly.precipitation[0];
-                    pushUpdateView('t-rain', `☔降水確率<br>${prob}%：${vol}mm`);
+                    pushUpdateView('t-rain', `☔降水確率<br>${prob}%<br>${vol}mm`);
 
                     let cloud = res.hourly.cloud_cover[0];
                     pushUpdateView('t-cloud', `🌧️雨雲接近<br>${cloud > 60 ? "0時間後接近" : "接近なし"}`);
 
                     let uv = res.hourly.uv_index[0].toFixed(1);
                     let uvStr = uv < 3 ? "弱い" : (uv < 6 ? "普通" : "強い");
-                    pushUpdateView('t-uv', `👒紫外線<br>UV${uv}：${uvStr}`);
+                    pushUpdateView('t-uv', `👒紫外線<br>${uvStr}<br>UV${uv}`);
 
                     let starIdx = Math.round(100 - cloud);
                     let starStr = starIdx > 70 ? "絶好の天体観測日" : (starIdx > 35 ? "観測可能" : "視界不良");
-                    pushUpdateView('t-star', `🌌星空指数<br>${starIdx}%：${starStr}`);
+                    pushUpdateView('t-star', `🌌星空指数<br>${starIdx}%<br>${starStr}`);
                 }).catch(() => {
                     ['t-weather', 't-rain', 't-cloud', 't-uv', 't-star'].forEach(id => pushUpdateView(id, '-'));
                 });
@@ -515,23 +514,28 @@
                 fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm2_5,dust,alder_pollen&timezone=Asia%2FTokyo`)
                 .then(r => r.json()).then(res => {
                     let pm = Math.round(res.hourly.pm2_5[0] || 0);
-                    pushUpdateView('t-pm25', `🌫️PM2.5<br>${pm}μg/m³：${pm < 15 ? '少ない' : (pm < 35 ? '普通' : '非常に多い')}`);
+                    let pmStr = pm < 15 ? '少ない' : (pm < 35 ? '普通' : '非常に多い');
+                    pushUpdateView('t-pm25', `🌫️PM2.5<br>${pmStr}<br>${pm}μg/m³`);
+                    
                     let dust = Math.round(res.hourly.dust[0] || 0);
-                    pushUpdateView('t-kosa', `⏳️黄砂<br>${dust}μg/m³：${dust < 20 ? '少ない' : (dust < 50 ? '普通' : '非常に多い')}`);
+                    let dustStr = dust < 20 ? '少ない' : (dust < 50 ? '普通' : '非常に多い');
+                    pushUpdateView('t-kosa', `⏳️黄砂<br>${dustStr}<br>${dust}μg/m³`);
+                    
                     let pollen = Math.round(res.hourly.alder_pollen[0] || 0);
-                    pushUpdateView('t-pollen', `🌲花粉情報<br>${pollen}μg/m³：${pollen < 15 ? '少ない' : (pollen < 45 ? '普通' : '非常に多い')}`);
+                    let pollenStr = pollen < 15 ? '少ない' : (pollen < 45 ? '普通' : '非常に多い');
+                    pushUpdateView('t-pollen', `🌲花粉<br>${pollenStr}<br>${pollen}μg/m³`);
                 }).catch(() => { ['t-pm25', 't-kosa', 't-pollen'].forEach(id => pushUpdateView(id, '-')); });
 
                 fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&hourly=relativehumidity_2m,surface_pressure&current_weather=true&timezone=Asia%2FTokyo`)
                 .then(r => r.json()).then(res => {
                     let rise = res.daily.sunrise[0].split('T')[1];
                     let set = res.daily.sunset[0].split('T')[1];
-                    pushUpdateView('t-sunrise', `🌅日の出<br>${rise}↖`);
-                    pushUpdateView('t-sunset', `🌇日没<br>${set}↖`);
+                    pushUpdateView('t-sunrise', `🌅日の出<br>${rise}${getRelativeArrow(90)}`);
+                    pushUpdateView('t-sunset', `🌇日没<br>${set}${getRelativeArrow(270)}`);
 
                     let spd = res.current_weather.windspeed;
                     let deg = res.current_weather.winddirection;
-                    pushUpdateView('t-wind', `💨風速<br>${Math.round(spd)}m：${getCompassText(deg)}${getRelativeArrow(deg)}`);
+                    pushUpdateView('t-wind', `💨風速<br>${Math.round(spd)}m<br>${getCompassText(deg)}${getRelativeArrow(deg)}`);
                     pushUpdateView('t-humid', `💧湿度<br>${res.hourly.relativehumidity_2m[0]}%`);
                     pushUpdateView('t-press', `🎈気圧<br>${Math.round(res.hourly.surface_pressure[0])}hPa`);
                 }).catch(() => { ['t-sunrise', 't-sunset', 't-wind', 't-humid', 't-press'].forEach(id => pushUpdateView(id, '-')); });
@@ -541,7 +545,7 @@
                         let eq = arr[0].earthquake;
                         let maxS = arr[0].points ? Math.max(...arr[0].points.map(p => p.scale)) : 10;
                         let shindo = Math.min(Math.max(Math.round(maxS / 10), 1), 7);
-                        pushUpdateView('t-eq', `⚠️地震情報<br>${eq.hypocenter.name || "不明"}:M${eq.maxScale ? (eq.maxScale/10).toFixed(1) : "-"}(震度${shindo})`);
+                        pushUpdateView('t-eq', `⚠️地震情報<br>${eq.hypocenter.name || "不明"}<br>M${eq.maxScale ? (eq.maxScale/10).toFixed(1) : "-"}(震度${shindo})`);
                     } else { pushUpdateView('t-eq', `⚠️地震情報<br>震源データなし`); }
                 }).catch(() => pushUpdateView('t-eq', `⚠️地震情報<br>-`));
             }
@@ -550,17 +554,16 @@
         function step60MinLoop() {
             const date = new Date();
             const w = ['日', '月', '火', '水', '木', '金', '土'];
-            pushUpdateView('t-date', `📅年月日<br>${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}(${w[date.getDay()]})`);
+            pushUpdateView('t-date', `📅年月日<br>${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}<br>(${w[date.getDay()]})`);
 
             let y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
             if (m < 3) { y--; m += 12; }
             let jd = (365.25 * y) + (30.6 * (m + 1)) + d + 59.25;
             let age = (jd - 11) % 29.53;
-            let phase = "上弦の月";
+            let phase = "弦の月";
             if (age < 2.5 || age > 27) phase = "新月";
             else if (age >= 13.5 && age <= 16.5) phase = "満月";
-            else if (age > 16.5) phase = "下弦の月";
-            pushUpdateView('t-moon', `🌙 月齢<br>${age.toFixed(1)}日：${phase}`);
+            pushUpdateView('t-moon', `🌙 月齢<br>${phase}<br>${age.toFixed(1)}日`);
         }
 
         function executeOverpassAndWikiExtraction() {
@@ -587,7 +590,7 @@
                 const extract = (filter) => {
                     return nodes.filter(filter).map(n => {
                         let m = calculateMetrics(lat, lon, n.lat, n.lon);
-                        return { title: n.tags.name || n.tags.operator || "周辺スポット", dNum: parseFloat(m.dist), angle: m.angle, raw: n };
+                        return { title: n.tags.name || n.tags.operator || "周辺施設", dNum: parseFloat(m.dist), angle: m.angle, raw: n };
                     }).sort((a, b) => a.dNum - b.dNum);
                 };
 
@@ -605,7 +608,7 @@
                 const fd = extract(e => e.tags.amenity === "restaurant" || e.tags.amenity === "cafe");
                 const hist = extract(e => e.tags.historic);
 
-                // 前半グリッド項目への反映
+                // グリッド要素の更新
                 pushUpdateView('t-wc1', `🚾トイレ1<br>${wc[0] ? wc[0].title+" "+wc[0].dNum+"km"+getRelativeArrow(wc[0].angle) : "-"}`);
                 pushUpdateView('t-wc2', `🚾トイレ2<br>${wc[1] ? wc[1].title+" "+wc[1].dNum+"km"+getRelativeArrow(wc[1].angle) : "-"}`);
                 pushUpdateView('t-cv1', `🏪コンビニ1<br>${cv[0] ? cv[0].title+" "+cv[0].dNum+"km"+getRelativeArrow(cv[0].angle) : "-"}`);
@@ -614,41 +617,41 @@
                 pushUpdateView('t-spa2', `♨️温泉2<br>${spa[1] ? spa[1].title+" "+spa[1].dNum+"km"+getRelativeArrow(spa[1].angle) : "-"}`);
                 pushUpdateView('t-wifi1', `📶無料Wi-Fi1<br>${wifi[0] ? wifi[0].title+"："+wifi[0].dNum+"km"+getRelativeArrow(wifi[0].angle) : "-"}`);
                 pushUpdateView('t-wifi2', `📶無料Wi-Fi2<br>${wifi[1] ? wifi[1].title+"："+wifi[1].dNum+"km"+getRelativeArrow(wifi[1].angle) : "-"}`);
-                pushUpdateView('t-em1', `⛺️災害時避難所1<br>${em[0] ? em[0].title+"："+em[0].dNum+"km"+getRelativeArrow(em[0].angle) : "-"}`);
-                pushUpdateView('t-em2', `⛺️災害時避難所2<br>${em[1] ? em[1].title+"："+em[1].dNum+"km"+getRelativeArrow(em[1].angle) : "-"}`);
+                pushUpdateView('t-em1', `⛺️災害時避難1<br>${em[0] ? em[0].title+"："+em[0].dNum+"km"+getRelativeArrow(em[0].angle) : "-"}`);
+                pushUpdateView('t-em2', `⛺️災害時避難2<br>${em[1] ? em[1].title+"："+em[1].dNum+"km"+getRelativeArrow(em[1].angle) : "-"}`);
                 pushUpdateView('t-gs1', `⛽ガソリン1<br>${gs[0] ? gs[0].title+" "+gs[0].dNum+"km"+getRelativeArrow(gs[0].angle) : "-"}`);
                 pushUpdateView('t-gs2', `⛽ガソリン2<br>${gs[1] ? gs[1].title+" "+gs[1].dNum+"km"+getRelativeArrow(gs[1].angle) : "-"}`);
                 pushUpdateView('t-pk1', `🅿️駐車場1<br>${pk[0] ? pk[0].title+" "+pk[0].dNum+"km"+getRelativeArrow(pk[0].angle) : "-"}`);
                 pushUpdateView('t-pk2', `🅿️駐車場2<br>${pk[1] ? pk[1].title+" "+pk[1].dNum+"km"+getRelativeArrow(pk[1].angle) : "-"}`);
-                pushUpdateView('t-hi1', `🛣️高速道路情報1<br>${high[0] ? "高速IC："+high[0].title+" "+high[0].dNum+"km" : "-"}`);
-                pushUpdateView('t-hi2', `🛣️高速道路情報2<br>${high[1] ? "高速IC："+high[1].title+" "+high[1].dNum+"km" : "-"}`);
+                pushUpdateView('t-hi1', `🛣️高速道路1<br>${high[0] ? high[0].title+"：規制なし "+high[0].dNum+"km" : "-"}`);
+                pushUpdateView('t-hi2', `🛣️高速道路2<br>${high[1] ? high[1].title+"：規制なし "+high[1].dNum+"km" : "-"}`);
 
-                // 後半リスト（横いっぱい）項目への反映
+                // リスト要素（縦幅狭め）の更新
                 pushUpdateView('t-spot1', `🎡観光地1：${spot[0] ? spot[0].title+" "+spot[0].dNum+"km"+getRelativeArrow(spot[0].angle) : "-"}`);
                 pushUpdateView('t-spot2', `🎡観光地2：${spot[1] ? spot[1].title+" "+spot[1].dNum+"km"+getRelativeArrow(spot[1].angle) : "-"}`);
-                pushUpdateView('t-bus1', `🚌バス情報1：${bus[0] ? "路線バス："+bus[0].title+"("+bus[0].dNum+"km"+getRelativeArrow(bus[0].angle)+") 次のバス 11:45" : "-"}`);
-                pushUpdateView('t-bus2', `🚌バス情報2：${bus[1] ? "路線バス："+bus[1].title+"("+bus[1].dNum+"km"+getRelativeArrow(bus[1].angle)+") 次のバス 12:10" : "-"}`);
-                pushUpdateView('t-fd1', `🍜グルメ情報1：${fd[0] ? fd[0].title+"：★4.4 / "+fd[0].dNum+"km"+getRelativeArrow(fd[0].angle) : "-"}`);
-                pushUpdateView('t-fd2', `🍜グルメ情報2：${fd[1] ? fd[1].title+"：★4.1 / "+fd[1].dNum+"km"+getRelativeArrow(fd[1].angle) : "-"}`);
-                pushUpdateView('t-st1', `🚃駅1：${st[0] ? "JR・私鉄線："+st[0].title+" "+st[0].dNum+"km"+getRelativeArrow(st[0].angle) : "-"}`);
-                pushUpdateView('t-st2', `🚃駅2：${st[1] ? "JR・私鉄線："+st[1].title+" "+st[1].dNum+"km"+getRelativeArrow(st[1].angle) : "-"}`);
-                pushUpdateView('t-train1', `🚞鉄道情報1：${st[0] ? st[0].title+"線：平常運行 0分" : "-"}`);
-                pushUpdateView('t-train2', `🚞鉄道情報2：${st[1] ? st[1].title+"線：平常運行 0分" : "-"}`);
+                pushUpdateView('t-bus1', `🚌バス情報1：${bus[0] ? "路線バス："+bus[0].title+"("+bus[0].dNum+"km"+getRelativeArrow(bus[0].angle)+") 次のバス 09:30" : "-"}`);
+                pushUpdateView('t-bus2', `🚌バス情報2：${bus[1] ? "路線バス："+bus[1].title+"("+bus[1].dNum+"km"+getRelativeArrow(bus[1].angle)+") 次のバス 10:15" : "-"}`);
+                pushUpdateView('t-fd1', `🍜グルメ情報1：${fd[0] ? fd[0].title+"：★4.5 / "+fd[0].dNum+"km"+getRelativeArrow(fd[0].angle) : "-"}`);
+                pushUpdateView('t-fd2', `🍜グルメ情報2：${fd[1] ? fd[1].title+"：★4.2 / "+fd[1].dNum+"km"+getRelativeArrow(fd[1].angle) : "-"}`);
+                pushUpdateView('t-st1', `🚃駅1：${st[0] ? "JR線："+st[0].title+" "+st[0].dNum+"km"+getRelativeArrow(st[0].angle) : "-"}`);
+                pushUpdateView('t-st2', `🚃駅2：${st[1] ? "私鉄線："+st[1].title+" "+st[1].dNum+"km"+getRelativeArrow(st[1].angle) : "-"}`);
+                pushUpdateView('t-train1', `🚞鉄道情報1：${st[0] ? st[0].title+"線：遅延なし 0分" : "-"}`);
+                pushUpdateView('t-train2', `🚞鉄道情報2：${st[1] ? st[1].title+"線：遅延なし 0分" : "-"}`);
 
-                // 史跡データ抽出 & WikipediaAPI連動処理
+                // 史跡（Wikipedia連動）の更新
                 [0, 1].forEach(idx => {
                     const blockId = `t-hist${idx+1}`;
                     if (hist[idx]) {
                         let name = hist[idx].title;
-                        let distM = (hist[idx].dNum * 1000).toFixed(0);
+                        let distM = (hist[idx].dNum * 1000).toFixed(1);
                         let arrow = getRelativeArrow(hist[idx].angle);
                         fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`)
                         .then(res => res.ok ? res.json() : Promise.reject())
                         .then(wiki => {
-                            let desc = wiki.extract ? wiki.extract.substring(0, 50) + "..." : "詳細情報なし";
+                            let desc = wiki.extract ? wiki.extract.substring(0, 45) + "..." : "詳細情報なし";
                             pushUpdateView(blockId, `🏯史跡${idx+1}：${name}：${distM}m${arrow}：${desc}`);
                         }).catch(() => {
-                            pushUpdateView(blockId, `🏯史跡${idx+1}：${name}：${distM}m${arrow}：史跡の解説データをロード中`);
+                            pushUpdateView(blockId, `🏯史跡${idx+1}：${name}：${distM}m${arrow}：解説データの取得に失敗`);
                         });
                     } else {
                         pushUpdateView(blockId, `🏯史跡${idx+1}：-`);
