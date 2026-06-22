@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旅のお供 ver48</title>
+    <title>旅のお供 ver49</title>
     <style>
         :root {
-            --bg-1: #030712;
-            --bg-2: #0b1329;
-            --bg-3: #1c163a;
+            --bg-1: #020617;
+            --bg-2: #0f172a;
+            --bg-3: #1e1b4b;
             --b-white: #ffffff;
-            --b-brown: #8b5a2b;
+            --b-brown: #92400e;
             --b-red: #ef4444;
             --b-orange: #f97316;
             --b-yellow: #eab308;
@@ -18,7 +18,6 @@
             --b-green: #22c55e;
             --b-emerald: #10b981;
             --b-blue: #3b82f6;
-            --b-purple: #a855f7;
             --updated-color: #06b6d4;
         }
 
@@ -33,22 +32,22 @@
             height: 100%;
             background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
             background-size: 400% 400%;
-            animation: gradientBg 12s ease infinite;
+            animation: gradientAnim 14s ease infinite;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        @keyframes gradientBg {
+        @keyframes gradientAnim {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* 初期オーバーレイ */
+        /* 初期起動オーバーレイ */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.98);
+            background: rgba(2, 6, 23, 0.99);
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -58,87 +57,92 @@
         }
 
         #startBtn {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
-            padding: 18px 40px;
+            padding: 20px 45px;
             color: #ffffff;
-            background: linear-gradient(135deg, #2563eb, #9333ea);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 25px rgba(147, 51, 234, 0.6);
+            box-shadow: 0 4px 30px rgba(139, 92, 246, 0.5);
             margin-bottom: 24px;
+            transition: transform 0.1s;
+        }
+
+        #startBtn:active {
+            transform: scale(0.98);
         }
 
         #overlay p {
-            color: #9ca3af;
-            font-size: 0.95rem;
+            color: #94a3b8;
+            font-size: 1rem;
             font-weight: bold;
             text-align: center;
             line-height: 1.6;
         }
 
-        /* アプリ外殻 */
+        /* メインアプリ構造 */
         .app-container {
             width: 100%;
             min-height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 5px;
+            padding: 6px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 45px;
-            padding: 0 5px;
+            height: 50px;
+            padding: 0 6px;
         }
 
         header h1 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.03em;
         }
 
         .controls {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
 
         .btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: #ffffff;
-            padding: 6px 14px;
+            padding: 7px 16px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
 
         #stopBtn.stopped {
-            background: #dc2626;
-            border-color: #dc2626;
+            background: #b91c1c;
+            border-color: #b91c1c;
         }
 
-        /* 横いっぱい1列4タイル固定、全60マス（15行） */
+        /* 必ず1列に4タイル表示（全56マス、14行固定） */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(15, minmax(80px, 1fr));
+            grid-template-rows: repeat(14, minmax(95px, 1fr));
             gap: 6px;
             width: 100%;
-            padding-bottom: 25px;
+            padding-bottom: 30px;
         }
 
         .tile {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(8px);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 5px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            border: 2.5px solid transparent;
+            border-radius: 10px;
+            padding: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -146,7 +150,7 @@
             transition: border-color 0.5s, color 0.5s;
         }
 
-        /* 初期枠色クラス */
+        /* 各種カラー枠線定義 */
         .w-white { border-color: var(--b-white); color: var(--b-white); }
         .w-brown { border-color: var(--b-brown); color: var(--b-brown); }
         .w-red { border-color: var(--b-red); color: var(--b-red); }
@@ -156,15 +160,14 @@
         .w-green { border-color: var(--b-green); color: var(--b-green); }
         .w-emerald { border-color: var(--b-emerald); color: var(--b-emerald); }
         .w-blue { border-color: var(--b-blue); color: var(--b-blue); }
-        .w-purple { border-color: var(--b-purple); color: var(--b-purple); }
 
-        /* 更新時の水色フラッシュ（文字色と枠色の両方を変更） */
+        /* 更新検知時の水色フラッシュ（文字・枠の双方を強制上書き） */
         .tile.updated {
             border-color: var(--updated-color) !important;
             color: var(--updated-color) !important;
         }
 
-        /* テキスト表示ルール（見切れ禁止・途中省略禁止・太字・自動縮小ベース） */
+        /* 視認性重視のテキスト設定（太字、途中省略禁止、見切れ禁止） */
         .tile-text {
             width: 100%;
             text-align: center;
@@ -172,21 +175,21 @@
             word-break: break-all;
             white-space: normal;
             display: inline-block;
-            font-size: calc(0.48rem + 0.4vw);
-            line-height: 1.3;
+            font-size: calc(0.5rem + 0.45vw);
+            line-height: 1.35;
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button id="startBtn" onclick="activateTools()">旅のお供 ver48 を起動</button>
+        <button id="startBtn" onclick="activateTools()">旅のお供 ver49 を起動</button>
         <p>※GPS位置情報とマイクを使用して情報を表示します。</p>
     </div>
 
     <div class="app-container">
         <header>
-            <h1>旅のお供 ver48</h1>
+            <h1>旅のお供 ver49</h1>
             <div class="controls">
                 <button class="btn" onclick="forceRefreshAll()">🔄一括更新</button>
                 <button class="btn" id="stopBtn" onclick="toggleLoopControl()">⏹️自動更新停止</button>
@@ -194,90 +197,84 @@
         </header>
 
         <main class="grid">
-            <div class="tile w-white" id="t-date"><span class="tile-text">📅年月日<br>-</span></div>
-            <div class="tile w-white" id="t-time"><span class="tile-text">🕒時刻<br>-</span></div>
-            <div class="tile w-white" id="t-tilt"><span class="tile-text">📐傾き<br>-</span></div>
-            <div class="tile w-white" id="t-dir"><span class="tile-text">🧭方角<br>-</span></div>
-            <div class="tile w-white" id="t-accel"><span class="tile-text">🚀加速度<br>-</span></div>
-            <div class="tile w-white" id="t-moon"><span class="tile-text">🌙 月齢<br>-</span></div>
+            <div class="tile var-white w-white" id="t-date"><span class="tile-text">📅年月日<br>-</span></div>
+            <div class="tile var-white w-white" id="t-time"><span class="tile-text">🕒時刻<br>-</span></div>
+            <div class="tile var-white w-white" id="t-tilt"><span class="tile-text">📐傾き<br>-</span></div>
+            <div class="tile var-white w-white" id="t-dir"><span class="tile-text">🧭方角<br>-</span></div>
+            <div class="tile var-white w-white" id="t-accel"><span class="tile-text">🚀加速度<br>-</span></div>
+            <div class="tile var-white w-white" id="t-moon"><span class="tile-text">🌙 月齢<br>-</span></div>
 
-            <div class="tile w-brown" id="t-noise"><span class="tile-text">🎤騒音<br>-</span></div>
+            <div class="tile var-brown w-brown" id="t-noise"><span class="tile-text">🎤騒音<br>-</span></div>
 
-            <div class="tile w-red" id="t-alt"><span class="tile-text">⛰️標高<br>-</span></div>
-            <div class="tile w-red" id="t-gps"><span class="tile-text">📡GPS精度<br>-</span></div>
-            <div class="tile w-red" id="t-speed"><span class="tile-text">🚗移動速度<br>-</span></div>
+            <div class="tile var-red w-red" id="t-alt"><span class="tile-text">⛰️標高<br>-</span></div>
+            <div class="tile var-red w-red" id="t-gps"><span class="tile-text">📡GPS精度<br>-</span></div>
+            <div class="tile var-red w-red" id="t-speed"><span class="tile-text">🚗移動速度<br>-</span></div>
 
-            <div class="tile w-orange" id="t-zip"><span class="tile-text">📍郵便番号<br>-</span></div>
-            <div class="tile w-orange" id="t-addr"><span class="tile-text">🗺️現在地<br>-</span></div>
+            <div class="tile var-orange w-orange" id="t-zip"><span class="tile-text">📍郵便番号<br>-</span></div>
+            <div class="tile var-orange w-orange" id="t-addr"><span class="tile-text">🗺️現在地<br>-</span></div>
 
-            <div class="tile w-yellow" id="t-tokyo"><span class="tile-text">⛪️東京駅まで<br>-</span></div>
-            <div class="tile w-yellow" id="t-sea"><span class="tile-text">🌊海まで<br>-</span></div>
-            <div class="tile w-yellow" id="t-fuji"><span class="tile-text">🗻富士山まで<br>-</span></div>
-            <div class="tile w-yellow" id="t-gov"><span class="tile-text">🏢県庁所在地<br>-</span></div>
+            <div class="tile var-yellow w-yellow" id="t-tokyo"><span class="tile-text">⛪️東京駅まで<br>-</span></div>
+            <div class="tile var-yellow w-yellow" id="t-sea"><span class="tile-text">🌊海まで<br>-</span></div>
+            <div class="tile var-yellow w-yellow" id="t-fuji"><span class="tile-text">🗻富士山まで<br>-</span></div>
+            <div class="tile var-yellow w-yellow" id="t-gov"><span class="tile-text">🏢県庁所在地<br>-</span></div>
 
-            <div class="tile w-lime" id="t-weather"><span class="tile-text">🌈天気<br>-</span></div>
-            <div class="tile w-lime" id="t-rain"><span class="tile-text">☔降水確率<br>-</span></div>
-            <div class="tile w-lime" id="t-cloud"><span class="tile-text">🌧️雨雲接近<br>-</span></div>
-            <div class="tile w-lime" id="t-uv"><span class="tile-text">👒紫外線<br>-</span></div>
-            <div class="tile w-lime" id="t-sunrise"><span class="tile-text">🌅日の出<br>-</span></div>
-            <div class="tile w-lime" id="t-sunset"><span class="tile-text">🌇日没<br>-</span></div>
-            <div class="tile w-lime" id="t-wind"><span class="tile-text">💨風速<br>-</span></div>
-            <div class="tile w-lime" id="t-humid"><span class="tile-text">💧湿度<br>-</span></div>
-            <div class="tile w-lime" id="t-press"><span class="tile-text">🎈気圧<br>-</span></div>
-            <div class="tile w-lime" id="t-star"><span class="tile-text">🌌星空指数<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-weather"><span class="tile-text">🌈天気<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-rain"><span class="tile-text">☔降水確率<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-cloud"><span class="tile-text">🌧️雨雲接近<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-uv"><span class="tile-text">👒紫外線<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-sunrise"><span class="tile-text">🌅日の出<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-sunset"><span class="tile-text">🌇日没<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-wind"><span class="tile-text">💨風速<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-humid"><span class="tile-text">💧湿度<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-press"><span class="tile-text">🎈気圧<br>-</span></div>
+            <div class="tile var-lime w-lime" id="t-star"><span class="tile-text">🌌星空指数<br>-</span></div>
 
-            <div class="tile w-green" id="t-pm25"><span class="tile-text">🌫️PM2.5<br>-</span></div>
-            <div class="tile w-green" id="t-kosa"><span class="tile-text">⏳️黄砂<br>-</span></div>
-            <div class="tile w-green" id="t-pollen"><span class="tile-text">🌲花粉情報<br>-</span></div>
+            <div class="tile var-green w-green" id="t-pm25"><span class="tile-text">🌫️PM2.5<br>-</span></div>
+            <div class="tile var-green w-green" id="t-kosa"><span class="tile-text">⏳️黄砂<br>-</span></div>
+            <div class="tile var-green w-green" id="t-pollen"><span class="tile-text">🌲花粉情報<br>-</span></div>
 
-            <div class="tile w-emerald" id="t-eq"><span class="tile-text">⚠️地震情報<br>-</span></div>
+            <div class="tile var-emerald w-emerald" id="t-eq"><span class="tile-text">⚠️地震情報<br>-</span></div>
 
-            <div class="tile w-blue" id="t-wc1"><span class="tile-text">🚾トイレ1<br>-</span></div>
-            <div class="tile w-blue" id="t-wc2"><span class="tile-text">🚾トイレ2<br>-</span></div>
-            <div class="tile w-blue" id="t-cv1"><span class="tile-text">🏪コンビニ1<br>-</span></div>
-            <div class="tile w-blue" id="t-cv2"><span class="tile-text">🏪コンビニ2<br>-</span></div>
-            <div class="tile w-blue" id="t-spa1"><span class="tile-text">♨️温泉1<br>-</span></div>
-            <div class="tile w-blue" id="t-spa2"><span class="tile-text">♨️温泉2<br>-</span></div>
-            <div class="tile w-blue" id="t-spot1"><span class="tile-text">🎡観光地1<br>-</span></div>
-            <div class="tile w-blue" id="t-spot2"><span class="tile-text">🎡観光地2<br>-</span></div>
-            <div class="tile w-blue" id="t-wifi1"><span class="tile-text">📶無料Wi-Fi1<br>-</span></div>
-            <div class="tile w-blue" id="t-wifi2"><span class="tile-text">📶無料Wi-Fi2<br>-</span></div>
-            <div class="tile w-blue" id="t-st1"><span class="tile-text">🚃駅1<br>-</span></div>
-            <div class="tile w-blue" id="t-st2"><span class="tile-text">🚃駅2<br>-</span></div>
-            <div class="tile w-blue" id="t-train1"><span class="tile-text">🚞鉄道情報1<br>-</span></div>
-            <div class="tile w-blue" id="t-train2"><span class="tile-text">🚞鉄道情報2<br>-</span></div>
-            <div class="tile w-blue" id="t-bus1"><span class="tile-text">🚌バス情報1<br>-</span></div>
-            <div class="tile w-blue" id="t-bus2"><span class="tile-text">🚌バス情報2<br>-</span></div>
-            <div class="tile w-blue" id="t-gs1"><span class="tile-text">⛽ガソリン1<br>-</span></div>
-            <div class="tile w-blue" id="t-gs2"><span class="tile-text">⛽ガソリン2<br>-</span></div>
-            <div class="tile w-blue" id="t-pk1"><span class="tile-text">🅿️駐車場1<br>-</span></div>
-            <div class="tile w-blue" id="t-pk2"><span class="tile-text">🅿️駐車場2<br>-</span></div>
-            <div class="tile w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路情報1<br>-</span></div>
-            <div class="tile w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路情報2<br>-</span></div>
-            <div class="tile w-blue" id="t-ev1"><span class="tile-text">🔋電気自動車充電1<br>-</span></div>
-            <div class="tile w-blue" id="t-ev2"><span class="tile-text">🔋電気自動車充電2<br>-</span></div>
-            <div class="tile w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難所1<br>-</span></div>
-            <div class="tile w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難所2<br>-</span></div>
-            <div class="tile w-blue" id="t-fd1"><span class="tile-text">🍜グルメ情報1<br>-</span></div>
-            <div class="tile w-blue" id="t-fd2"><span class="tile-text">🍜グルメ情報2<br>-</span></div>
-
-            <div class="tile w-purple" id="t-his1"><span class="tile-text">🏯史跡1<br>-</span></div>
-            <div class="tile w-purple" id="t-his2"><span class="tile-text">🏯史跡2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-wc1"><span class="tile-text">🚾トイレ1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-wc2"><span class="tile-text">🚾トイレ2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-cv1"><span class="tile-text">🏪コンビニ1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-cv2"><span class="tile-text">🏪コンビニ2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-spa1"><span class="tile-text">♨️温泉1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-spa2"><span class="tile-text">♨️温泉2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-spot1"><span class="tile-text">🎡観光地1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-spot2"><span class="tile-text">🎡観光地2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-wifi1"><span class="tile-text">📶無料Wi-Fi1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-wifi2"><span class="tile-text">📶無料Wi-Fi2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-st1"><span class="tile-text">🚃駅1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-st2"><span class="tile-text">🚃駅2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-train1"><span class="tile-text">🚞鉄道情報1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-train2"><span class="tile-text">🚞鉄道情報2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-bus1"><span class="tile-text">🚌バス情報1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-bus2"><span class="tile-text">🚌バス情報2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-gs1"><span class="tile-text">⛽ガソリン1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-gs2"><span class="tile-text">⛽ガソリン2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-pk1"><span class="tile-text">🅿️駐車場1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-pk2"><span class="tile-text">🅿️駐車場2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路情報1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路情報2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難所1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難所2<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-fd1"><span class="tile-text">🍜グルメ情報1<br>-</span></div>
+            <div class="tile var-blue w-blue" id="t-fd2"><span class="tile-text">🍜グルメ情報2<br>-</span></div>
         </main>
     </div>
 
     <script>
         let isSystemActive = false;
-        let poolTimers = [];
+        let activeLoops = [];
         let lat = null, lon = null, currentHeading = 0;
         let audioCtx = null, micAnalyser = null;
 
-        const POS_TOKYO = { lat: 35.681236, lon: 139.767125 };
-        const POS_FUJI = { lat: 35.360556, lon: 138.727778 };
-        const POS_SEA = { lat: 35.4431, lon: 139.6504 }; // 神奈川近海基準
+        const TOKYO_COORD = { lat: 35.681236, lon: 139.767125 };
+        const FUJI_COORD = { lat: 35.360556, lon: 138.727778 };
+        const SEA_COORD = { lat: 35.4431, lon: 139.6504 };
 
-        // 47都道府県庁所在地データベース
-        const MASTER_GOVS = [
+        const GOV_PREF_LIST = [
             {name:"札幌市",lat:43.06417,lon:141.34694},{name:"青森市",lat:40.82444,lon:140.74000},{name:"盛岡市",lat:39.70361,lon:141.15250},{name:"仙台市",lat:38.26889,lon:140.87194},{name:"秋田市",lat:39.71861,lon:140.10250},{name:"山形市",lat:38.24056,lon:140.36333},{name:"福島市",lat:37.75000,lon:140.46778},{name:"水戸市",lat:36.34167,lon:140.44667},{name:"宇都宮市",lat:36.56583,lon:139.88361},{name:"前橋市",lat:36.39111,lon:139.06083},{name:"さいたま市",lat:35.85694,lon:139.65722},{name:"千葉市",lat:35.60472,lon:140.12333},{name:"新宿区",lat:35.68944,lon:139.69167},{name:"横浜市",lat:35.44778,lon:139.64250},{name:"新潟市",lat:37.90222,lon:139.02361},{name:"富山市",lat:36.69528,lon:137.21139},{name:"金沢市",lat:36.59444,lon:136.62556},{name:"福井市",lat:36.06528,lon:136.22194},{name:"甲府市",lat:35.66389,lon:138.56833},{name:"長野市",lat:36.65139,lon:138.18111},{name:"岐阜市",lat:35.39111,lon:136.72222},{name:"静岡市",lat:34.97694,lon:138.38306},{name:"名古屋市",lat:35.18028,lon:136.90667},{name:"津市",lat:34.73028,lon:136.50861},{name:"大津市",lat:34.99472,lon:135.86861},{name:"京都市",lat:35.02139,lon:135.75556},{name:"大阪市",lat:34.68639,lon:135.52000},{name:"神戸市",lat:34.69139,lon:135.19556},{name:"奈良市",lat:34.68528,lon:135.83278},{name:"和歌山市",lat:34.22611,lon:135.16750},{name:"鳥取市",lat:35.50361,lon:134.23833},{name:"松江市",lat:35.47222,lon:132.96611},{name:"岡山市",lat:34.66167,lon:133.93500},{name:"広島市",lat:34.39639,lon:132.45944},{name:"山口市",lat:34.18583,lon:131.47139},{name:"徳島市",lat:34.06583,lon:134.55944},{name:"高松市",lat:34.34028,lon:134.04333},{name:"松山市",lat:33.84167,lon:132.76611},{name:"高知市",lat:33.55972,lon:133.53111},{name:"福岡市",lat:33.60639,lon:130.41806},{name:"佐賀市",lat:33.24944,lon:130.30083},{name:"長崎市",lat:32.74472,lon:129.87361},{name:"熊本市",lat:32.79028,lon:130.74167},{name:"大分市",lat:33.23806,lon:131.61250},{name:"宮崎市",lat:31.91111,lon:131.42389},{name:"鹿児島市",lat:31.56028,lon:130.55806},{name:"那覇市",lat:26.21250,lon:127.68111}
         ];
 
@@ -285,70 +282,64 @@
             document.getElementById('overlay').style.display = 'none';
             isSystemActive = true;
 
-            initHardwareSensors();
+            setupHardwareNodes();
 
-            // インターバルタスクのマッピング登録
-            linkWorkerLoop(clockTask, 1000);
-            linkWorkerLoop(sensor5SecTask, 5000);
-            linkWorkerLoop(sensor3MinTask, 180000);
-            linkWorkerLoop(api10MinTask, 600000);
-            linkWorkerLoop(api15MinTask, 900000);
-            linkWorkerLoop(api20MinTask, 1200000);
-            linkWorkerLoop(api60MinTask, 3600000);
+            registerLoop(clockTick, 1000);
+            registerLoop(step5SecLoop, 5000);
+            registerLoop(step3MinLoop, 180000);
+            registerLoop(step10MinLoop, 600000);
+            registerLoop(step15MinLoop, 900000);
+            registerLoop(step20MinLoop, 1200000);
+            registerLoop(step60MinLoop, 3600000);
 
-            // 初回非同期一括更新
-            setTimeout(() => { forceRefreshAll(); }, 300);
+            setTimeout(() => { forceRefreshAll(); }, 200);
         }
 
-        function linkWorkerLoop(task, interval) {
-            task();
-            const id = setInterval(() => { if (isSystemActive) task(); }, interval);
-            poolTimers.push(id);
+        function registerLoop(fn, delay) {
+            fn();
+            let id = setInterval(() => { if (isSystemActive) fn(); }, delay);
+            activeLoops.push(id);
         }
 
-        function pushUpdateView(elementId, contentHTML) {
-            const targetNode = document.getElementById(elementId);
-            if (!targetNode) return;
-            const innerSpan = targetNode.querySelector('.tile-text');
+        function pushUpdateView(id, textHTML) {
+            const block = document.getElementById(id);
+            if (!block) return;
+            const container = block.querySelector('.tile-text');
             
-            // 内容が変化した時のみ「文字色＋枠色」を水色に変えるフラッシュを走らせる
-            if (innerSpan.innerHTML !== contentHTML) {
-                innerSpan.innerHTML = contentHTML;
-                targetNode.classList.add('updated');
-                setTimeout(() => {
-                    targetNode.classList.remove('updated');
-                }, 800);
+            if (container.innerHTML !== textHTML) {
+                container.innerHTML = textHTML;
+                block.classList.add('updated');
+                setTimeout(() => { block.classList.remove('updated'); }, 800);
             }
         }
 
         function toggleLoopControl() {
-            const button = document.getElementById('stopBtn');
+            const btn = document.getElementById('stopBtn');
             if (isSystemActive) {
                 isSystemActive = false;
-                button.textContent = "▶️自動更新再開";
-                button.classList.add('stopped');
+                btn.textContent = "▶️自動更新再開";
+                btn.classList.add('stopped');
             } else {
                 isSystemActive = true;
-                button.textContent = "⏹️自動更新停止";
-                button.classList.remove('stopped');
+                btn.textContent = "⏹️自動更新停止";
+                btn.classList.remove('stopped');
                 forceRefreshAll();
             }
         }
 
         function forceRefreshAll() {
-            clockTask();
-            sensor5SecTask();
-            sensor3MinTask();
-            api10MinTask();
-            api15MinTask();
-            api20MinTask();
-            api60MinTask();
+            clockTick();
+            step5SecLoop();
+            step3MinLoop();
+            step10MinLoop();
+            step15MinLoop();
+            step20MinLoop();
+            step60MinLoop();
         }
 
-        // 高精度測地ハヴァサイン
-        function calcDistanceAndBearing(lat1, lon1, lat2, lon2) {
+        function calculateMetrics(lat1, lon1, lat2, lon2) {
             const r = Math.PI / 180;
-            const R = 6371; 
+            const R = 6371;
             const dLat = (lat2 - lat1) * r;
             const dLon = (lon2 - lon1) * r;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*r) * Math.cos(lat2*r) * Math.sin(dLon/2) * Math.sin(dLon/2);
@@ -357,59 +348,59 @@
 
             const y = Math.sin(dLon) * Math.cos(lat2*r);
             const x = Math.cos(lat1*r) * Math.sin(lat2*r) - Math.sin(lat1*r) * Math.cos(lat2*r) * Math.cos(dLon);
-            let bearing = Math.atan2(y, x) * 180 / Math.PI;
-            return { distance: d.toFixed(1), bearing: (bearing + 360) % 360 };
+            let b = Math.atan2(y, x) * 180 / Math.PI;
+            return { dist: d.toFixed(1), angle: (b + 360) % 360 };
         }
 
-        function resolveRelativeArrow(targetAngle) {
-            let relative = (targetAngle - currentHeading + 360) % 360;
-            if (relative >= 337.5 || relative < 22.5) return "↓";
-            if (relative >= 22.5 && relative < 67.5) return "↙";
-            if (relative >= 67.5 && relative < 112.5) return "←";
-            if (relative >= 112.5 && relative < 157.5) return "↖";
-            if (relative >= 157.5 && relative < 202.5) return "↑";
-            if (relative >= 202.5 && relative < 247.5) return "↗";
-            if (relative >= 247.5 && relative < 292.5) return "→";
-            if (relative >= 292.5 && relative < 337.5) return "↘";
+        function getRelativeArrow(targetAngle) {
+            let rel = (targetAngle - currentHeading + 360) % 360;
+            if (rel >= 337.5 || rel < 22.5) return "↓";
+            if (rel >= 22.5 && rel < 67.5) return "↙";
+            if (rel >= 67.5 && rel < 112.5) return "←";
+            if (rel >= 112.5 && rel < 157.5) return "↖";
+            if (rel >= 157.5 && rel < 202.5) return "↑";
+            if (rel >= 202.5 && rel < 247.5) return "↗";
+            if (rel >= 247.5 && rel < 292.5) return "→";
+            if (rel >= 292.5 && rel < 337.5) return "↘";
             return "↓";
         }
 
-        function convertCompassString(deg) {
-            const directions = ["北", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南", "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西"];
-            return directions[Math.round(deg / 22.5) % 16];
+        function getCompassText(deg) {
+            const arr = ["北", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南", "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西"];
+            return arr[Math.round(deg / 22.5) % 16];
         }
 
-        function initHardwareSensors() {
+        function setupHardwareNodes() {
             if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(pos => {
-                    lat = pos.coords.latitude;
-                    lon = pos.coords.longitude;
-                    let kmh = pos.coords.speed ? (pos.coords.speed * 3.6).toFixed(1) : "0";
-                    let altM = pos.coords.altitude ? Math.round(pos.coords.altitude) + "m" : "-";
-                    let rawAcc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : 99;
-                    let levelStr = rawAcc <= 15 ? "高" : (rawAcc <= 45 ? "中" : "低");
+                navigator.geolocation.watchPosition(p => {
+                    lat = p.coords.latitude;
+                    lon = p.coords.longitude;
+                    let speedKmh = p.coords.speed ? (p.coords.speed * 3.6).toFixed(1) : "0";
+                    let altitudeM = p.coords.altitude ? Math.round(p.coords.altitude) + "m" : "-";
+                    let accuracyM = p.coords.accuracy ? Math.round(p.coords.accuracy) : 99;
+                    let quality = accuracyM <= 15 ? "高" : (accuracyM <= 45 ? "中" : "低");
 
-                    document.getElementById('t-speed').querySelector('.tile-text').innerHTML = `🚗移動速度<br>${kmh} km/h`;
-                    document.getElementById('t-alt').querySelector('.tile-text').innerHTML = `⛰️標高<br>${altM}`;
-                    document.getElementById('t-gps').querySelector('.tile-text').innerHTML = `📡GPS精度<br>${rawAcc}：${levelStr}`;
+                    document.getElementById('t-speed').querySelector('.tile-text').innerHTML = `🚗移動速度<br>${speedKmh} km/h`;
+                    document.getElementById('t-alt').querySelector('.tile-text').innerHTML = `⛰️標高<br>${altitudeM}`;
+                    document.getElementById('t-gps').querySelector('.tile-text').innerHTML = `📡GPS精度<br>${accuracyM}：${quality}`;
                 }, null, { enableHighAccuracy: true });
             }
 
-            window.addEventListener('deviceorientation', ev => {
+            window.addEventListener('deviceorientation', e => {
                 if (!isSystemActive) return;
-                let heading = ev.webkitCompassHeading || ev.alpha || 0;
+                let heading = e.webkitCompassHeading || e.alpha || 0;
                 currentHeading = heading;
-                let pitch = Math.max(Math.abs(ev.beta || 0), Math.abs(ev.gamma || 0));
-                document.getElementById('t-tilt').querySelector('.tile-text').innerHTML = `📐傾き<br>${Math.round(pitch)}°`;
-                document.getElementById('t-dir').querySelector('.tile-text').innerHTML = `🧭方角<br>${resolveRelativeArrow(heading)}${convertCompassString(heading)} ${Math.round(heading)}°`;
+                let tiltDeg = Math.max(Math.abs(e.beta || 0), Math.abs(e.gamma || 0));
+                document.getElementById('t-tilt').querySelector('.tile-text').innerHTML = `📐傾き<br>${Math.round(tiltDeg)}°`;
+                document.getElementById('t-dir').querySelector('.tile-text').innerHTML = `🧭方角<br>${getRelativeArrow(heading)}${getCompassText(heading)} ${Math.round(heading)}°`;
             }, true);
 
-            window.addEventListener('devicemotion', ev => {
+            window.addEventListener('devicemotion', e => {
                 if (!isSystemActive) return;
-                let accel = ev.accelerationIncludingGravity;
-                if (accel) {
-                    let vectorNorm = Math.sqrt(accel.x*accel.x + accel.y*accel.y + accel.z*accel.z);
-                    document.getElementById('t-accel').querySelector('.tile-text').innerHTML = `🚀加速度<br>${Math.round(vectorNorm * 10)} km/h`;
+                let acc = e.accelerationIncludingGravity;
+                if (acc) {
+                    let norm = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+                    document.getElementById('t-accel').querySelector('.tile-text').innerHTML = `🚀加速度<br>${Math.round(norm * 10)} km/h`;
                 }
             });
 
@@ -421,262 +412,220 @@
             }).catch(() => {});
         }
 
-        function clockTask() {
-            const now = new Date();
-            document.getElementById('t-time').querySelector('.tile-text').innerHTML = `🕒時刻<br>${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        function clockTick() {
+            const d = new Date();
+            document.getElementById('t-time').querySelector('.tile-text').innerHTML = `🕒時刻<br>${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         }
 
-        function sensor5SecTask() {
+        function step5SecLoop() {
             pushUpdateView('t-speed', document.getElementById('t-speed').querySelector('.tile-text').innerHTML);
             pushUpdateView('t-alt', document.getElementById('t-alt').querySelector('.tile-text').innerHTML);
             pushUpdateView('t-gps', document.getElementById('t-gps').querySelector('.tile-text').innerHTML);
         }
 
-        function sensor3MinTask() {
+        function step3MinLoop() {
             if (micAnalyser) {
-                let buffer = new Uint8Array(micAnalyser.frequencyBinCount);
-                micAnalyser.getByteFrequencyData(buffer);
-                let summation = buffer.reduce((sum, v) => sum + v, 0) / buffer.length;
-                let calibratedDb = Math.round(summation + 32);
-                let stateTxt = calibratedDb < 45 ? "静か" : (calibratedDb < 70 ? "普通" : "騒がしい");
-                pushUpdateView('t-noise', `🎤騒音<br>${calibratedDb}dB：${stateTxt}`);
+                let bin = new Uint8Array(micAnalyser.frequencyBinCount);
+                micAnalyser.getByteFrequencyData(bin);
+                let avg = bin.reduce((a, b) => a + b, 0) / bin.length;
+                let db = Math.round(avg + 30);
+                let status = db < 45 ? "静か" : (db < 70 ? "普通" : "騒がしい");
+                pushUpdateView('t-noise', `🎤騒音<br>${db}dB：${status}`);
             } else { pushUpdateView('t-noise', `🎤騒音<br>-`); }
 
             if (lat && lon) {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                .then(res => res.json()).then(data => {
-                    let fields = data.address;
-                    let code = fields.postcode ? `〒${fields.postcode}` : "-";
-                    let combinedAddr = (fields.province || fields.state || "") + (fields.city || fields.ward || fields.town || "") + (fields.suburb || fields.neighbourhood || "") + (fields.road || "");
-                    pushUpdateView('t-zip', `📍郵便番号<br>${code}`);
-                    pushUpdateView('t-addr', `🗺️現在地<br>${combinedAddr || "-"}`);
+                .then(r => r.json()).then(res => {
+                    let addr = res.address;
+                    let zip = addr.postcode ? `〒${addr.postcode}` : "-";
+                    let name = (addr.province || addr.state || "") + (addr.city || addr.ward || addr.town || "") + (addr.suburb || addr.road || "");
+                    pushUpdateView('t-zip', `📍郵便番号<br>${zip}`);
+                    pushUpdateView('t-addr', `🗺️現在地<br>${name || "-"}`);
                 }).catch(() => { pushUpdateView('t-zip', `📍郵便番号<br>-`); pushUpdateView('t-addr', `🗺️現在地<br>-`); });
             }
         }
 
-        function api10MinTask() {
+        function step10MinLoop() {
             if (lat && lon) {
-                let tokyoData = calcDistanceAndBearing(lat, lon, POS_TOKYO.lat, POS_TOKYO.lon);
-                pushUpdateView('t-tokyo', `⛪️東京駅まで<br>${resolveRelativeArrow(tokyoData.bearing)}${tokyoData.distance}km`);
+                let tk = calculateMetrics(lat, lon, TOKYO_COORD.lat, TOKYO_COORD.lon);
+                pushUpdateView('t-tokyo', `⛪️東京駅まで<br>${getRelativeArrow(tk.angle)}${tk.dist}km`);
 
-                let fujiData = calcDistanceAndBearing(lat, lon, POS_FUJI.lat, POS_FUJI.lon);
-                pushUpdateView('t-fuji', `🗻富士山まで<br>${resolveRelativeArrow(fujiData.bearing)}${fujiData.distance}km`);
+                let fj = calculateMetrics(lat, lon, FUJI_COORD.lat, TOKYO_COORD.lon);
+                pushUpdateView('t-fuji', `🗻富士山まで<br>${getRelativeArrow(fj.angle)}${fj.dist}km`);
 
-                let seaData = calcDistanceAndBearing(lat, lon, POS_SEA.lat, POS_SEA.lon);
-                pushUpdateView('t-sea', `🌊海まで<br>${resolveRelativeArrow(seaData.bearing)}${seaData.distance}km`);
+                let sea = calculateMetrics(lat, lon, SEA_COORD.lat, SEA_COORD.lon);
+                pushUpdateView('t-sea', `🌊海まで<br>${getRelativeArrow(sea.angle)}${sea.dist}km`);
 
-                // 都道府県庁自動検出計算
-                let closestGovName = null;
-                let minimumGovDistance = Infinity;
-                let targetGovAngle = 0;
-                MASTER_GOVS.forEach(item => {
-                    let calculated = calcDistanceAndBearing(lat, lon, item.lat, item.lon);
-                    let parsedDist = parseFloat(calculated.distance);
-                    if (parsedDist < minimumGovDistance) {
-                        minimumGovDistance = parsedDist;
-                        closestGovName = item.name;
-                        targetGovAngle = calculated.bearing;
+                let closestName = null, minDist = Infinity, targetAngle = 0;
+                GOV_PREF_LIST.forEach(g => {
+                    let m = calculateMetrics(lat, lon, g.lat, g.lon);
+                    let dNum = parseFloat(m.dist);
+                    if (dNum < minDist) {
+                        minDist = dNum; closestName = g.name; targetAngle = m.angle;
                     }
                 });
-                pushUpdateView('t-gov', `🏢県庁所在地<br>${closestGovName}：${resolveRelativeArrow(targetGovAngle)}${minimumGovDistance.toFixed(1)}km`);
+                pushUpdateView('t-gov', `🏢県庁所在地<br>${closestName}：${getRelativeArrow(targetAngle)}${minDist.toFixed(1)}km`);
 
-                invokeOverpassQuery();
-                invokeWikipediaQuery();
+                executeOverpassExtraction();
             }
         }
 
-        function api15MinTask() {
+        function step15MinLoop() {
             if (lat && lon) {
                 fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover,uv_index&current_weather=true&timezone=Asia%2FTokyo`)
-                .then(res => res.json()).then(data => {
-                    let current = data.current_weather;
-                    let weatherSymbol = current.weathercode <= 1 ? "☀️" : (current.weathercode <= 3 ? "🌤️" : (current.weathercode < 60 ? "☁️" : "☔"));
-                    pushUpdateView('t-weather', `🌈天気<br>${weatherSymbol}${Math.round(current.temperature)}℃`);
+                .then(r => r.json()).then(res => {
+                    let cur = res.current_weather;
+                    let ico = cur.weathercode <= 1 ? "☀️" : (cur.weathercode <= 3 ? "🌤️" : (cur.weathercode < 60 ? "☁️" : "☔"));
+                    pushUpdateView('t-weather', `🌈天気<br>${ico}${Math.round(cur.temperature)}℃`);
 
-                    let chance = data.hourly.precipitation_probability[0];
-                    let volume = data.hourly.precipitation[0];
-                    pushUpdateView('t-rain', `☔降水確率<br>${chance}%：${volume}mm`);
+                    let prob = res.hourly.precipitation_probability[0];
+                    let vol = res.hourly.precipitation[0];
+                    pushUpdateView('t-rain', `☔降水確率<br>${prob}%：${vol}mm`);
 
-                    let cloudDensity = data.hourly.cloud_cover[0];
-                    pushUpdateView('t-cloud', `🌧️雨雲接近<br>${cloudDensity > 65 ? "0時間後接近" : "接近なし"}`);
+                    let cloud = res.hourly.cloud_cover[0];
+                    pushUpdateView('t-cloud', `🌧️雨雲接近<br>${cloud > 60 ? "0時間後接近" : "接近なし"}`);
 
-                    let uvIdx = data.hourly.uv_index[0].toFixed(1);
-                    let uvLvl = uvIdx < 3 ? "弱い" : (uvIdx < 6 ? "普通" : "強い");
-                    pushUpdateView('t-uv', `👒紫外線<br>UV${uvIdx}：${uvLvl}`);
+                    let uv = res.hourly.uv_index[0].toFixed(1);
+                    let uvStr = uv < 3 ? "弱い" : (uv < 6 ? "普通" : "強い");
+                    pushUpdateView('t-uv', `👒紫外線<br>UV${uv}：${uvStr}`);
 
-                    let clearSkyIndex = Math.round(100 - cloudDensity);
-                    let observationTxt = clearSkyIndex > 75 ? "絶好の天体観測日" : (clearSkyIndex > 40 ? "観測可能" : "視界不良");
-                    pushUpdateView('t-star', `🌌星空指数<br>${clearSkyIndex}%：${observationTxt}`);
+                    let starIdx = Math.round(100 - cloud);
+                    let starStr = starIdx > 70 ? "絶好の天体観測日" : (starIdx > 35 ? "観測可能" : "視界不良");
+                    pushUpdateView('t-star', `🌌星空指数<br>${starIdx}%：${starStr}`);
                 }).catch(() => {
                     ['t-weather', 't-rain', 't-cloud', 't-uv', 't-star'].forEach(id => pushUpdateView(id, '-'));
                 });
             }
         }
 
-        function api20MinTask() {
+        function step20MinLoop() {
             if (lat && lon) {
-                fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm2_5,dust,alder_pollen,birch_pollen&timezone=Asia%2FTokyo`)
-                .then(res => res.json()).then(data => {
-                    let pmValue = Math.round(data.hourly.pm2_5[0] || 0);
-                    let pmStatus = pmValue < 15 ? "少ない" : (pmValue < 35 ? "普通" : "非常に多い");
-                    pushUpdateView('t-pm25', `🌫️PM2.5<br>${pmValue}μg/m³：${pmStatus}`);
-
-                    let dustValue = Math.round(data.hourly.dust[0] || 0);
-                    let dustStatus = dustValue < 20 ? "少ない" : (dustValue < 50 ? "普通" : "非常に多い");
-                    pushUpdateView('t-kosa', `⏳️黄砂<br>${dustValue}μg/m³：${dustStatus}`);
-
-                    let totalPollen = Math.round((data.hourly.alder_pollen[0] || 0) + (data.hourly.birch_pollen[0] || 0));
-                    let pollenStatus = totalPollen < 10 ? "少ない" : (totalPollen < 50 ? "普通" : "非常に多い");
-                    pushUpdateView('t-pollen', `🌲花粉情報<br>${totalPollen}μg/m³：${pollenStatus}`);
-                }).catch(() => {
-                    ['t-pm25', 't-kosa', 't-pollen'].forEach(id => pushUpdateView(id, '-'));
-                });
+                fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm2_5,dust,alder_pollen&timezone=Asia%2FTokyo`)
+                .then(r => r.json()).then(res => {
+                    let pm = Math.round(res.hourly.pm2_5[0] || 0);
+                    pushUpdateView('t-pm25', `🌫️PM2.5<br>${pm}μg/m³：${pm < 15 ? '少ない' : (pm < 35 ? '普通' : '非常に多い')}`);
+                    let dust = Math.round(res.hourly.dust[0] || 0);
+                    pushUpdateView('t-kosa', `⏳️黄砂<br>${dust}μg/m³：${dust < 20 ? '少ない' : (dust < 50 ? '普通' : '非常に多い')}`);
+                    let pollen = Math.round(res.hourly.alder_pollen[0] || 0);
+                    pushUpdateView('t-pollen', `🌲花粉情報<br>${pollen}μg/m³：${pollen < 15 ? '少ない' : (pollen < 45 ? '普通' : '非常に多い')}`);
+                }).catch(() => { ['t-pm25', 't-kosa', 't-pollen'].forEach(id => pushUpdateView(id, '-')); });
 
                 fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&hourly=relativehumidity_2m,surface_pressure&current_weather=true&timezone=Asia%2FTokyo`)
-                .then(res => res.json()).then(data => {
-                    let rRise = data.daily.sunrise[0].split('T')[1];
-                    let rSet = data.daily.sunset[0].split('T')[1];
-                    pushUpdateView('t-sunrise', `🌅日の出<br>${rRise}↖`);
-                    pushUpdateView('t-sunset', `🌇日没<br>${rSet}↖`);
+                .then(r => r.json()).then(res => {
+                    let rise = res.daily.sunrise[0].split('T')[1];
+                    let set = res.daily.sunset[0].split('T')[1];
+                    pushUpdateView('t-sunrise', `🌅日の出<br>${rise}↖`);
+                    pushUpdateView('t-sunset', `🌇日没<br>${set}↖`);
 
-                    let wSpeed = data.current_weather.windspeed;
-                    let wDeg = data.current_weather.winddirection;
-                    pushUpdateView('t-wind', `💨風速<br>${Math.round(wSpeed)}m：${convertCompassString(wDeg)}${resolveRelativeArrow(wDeg)}`);
+                    let spd = res.current_weather.windspeed;
+                    let deg = res.current_weather.winddirection;
+                    pushUpdateView('t-wind', `💨風速<br>${Math.round(spd)}m：${getCompassText(deg)}${getRelativeArrow(deg)}`);
+                    pushUpdateView('t-humid', `💧湿度<br>${res.hourly.relativehumidity_2m[0]}%`);
+                    pushUpdateView('t-press', `🎈気圧<br>${Math.round(res.hourly.surface_pressure[0])}hPa`);
+                }).catch(() => { ['t-sunrise', 't-sunset', 't-wind', 't-humid', 't-press'].forEach(id => pushUpdateView(id, '-')); });
 
-                    let hum = data.hourly.relativehumidity_2m[0];
-                    pushUpdateView('t-humid', `💧湿度<br>${hum}%`);
-
-                    let pressureVal = Math.round(data.hourly.surface_pressure[0]);
-                    pushUpdateView('t-press', `🎈気圧<br>${pressureVal}hPa`);
-                }).catch(() => {
-                    ['t-sunrise', 't-sunset', 't-wind', 't-humid', 't-press'].forEach(id => pushUpdateView(id, '-'));
-                });
-
-                fetch('https://api.p2pquake.net/v2/jma/islands')
-                .then(res => res.json()).then(arr => {
-                    if(arr && arr.length > 0 && arr[0].earthquake) {
-                        let core = arr[0].earthquake;
-                        let maxScaleInt = arr[0].points ? Math.max(...arr[0].points.map(p => p.scale)) : "-";
-                        let parsedScale = maxScaleInt !== "-" ? Math.min(Math.max(Math.round(maxScaleInt / 10), 1), 7) : "-";
-                        pushUpdateView('t-eq', `⚠️地震情報<br>${core.hypocenter.name || "不明"}:M${core.maxScale ? (core.maxScale/10).toFixed(1) : "-"}(震度${parsedScale})`);
+                fetch('https://api.p2pquake.net/v2/jma/islands').then(r => r.json()).then(arr => {
+                    if (arr && arr.length > 0 && arr[0].earthquake) {
+                        let eq = arr[0].earthquake;
+                        let maxS = arr[0].points ? Math.max(...arr[0].points.map(p => p.scale)) : 10;
+                        let shindo = Math.min(Math.max(Math.round(maxS / 10), 1), 7);
+                        pushUpdateView('t-eq', `⚠️地震情報<br>${eq.hypocenter.name || "不明"}:M${eq.maxScale ? (eq.maxScale/10).toFixed(1) : "-"}(震度${shindo})`);
                     } else { pushUpdateView('t-eq', `⚠️地震情報<br>震源データなし`); }
                 }).catch(() => pushUpdateView('t-eq', `⚠️地震情報<br>-`));
             }
         }
 
-        function api60MinTask() {
+        function step60MinLoop() {
             const date = new Date();
-            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-            pushUpdateView('t-date', `📅年月日<br>${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}(${weekdays[date.getDay()]})`);
+            const w = ['日', '月', '火', '水', '木', '金', '土'];
+            pushUpdateView('t-date', `📅年月日<br>${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}(${w[date.getDay()]})`);
 
-            let targetYear = date.getFullYear(), targetMonth = date.getMonth() + 1, targetDay = date.getDate();
-            if (targetMonth < 3) { targetYear--; targetMonth += 12; }
-            let julianDays = (365.25 * targetYear) + (30.6 * (targetMonth + 1)) + targetDay + 59.25;
-            let currentMoonAge = (julianDays - 11) % 29.53;
-            let moonPhaseStr = "上弦の月";
-            if (currentMoonAge < 2.5 || currentMoonAge > 27) moonPhaseStr = "新月";
-            else if (currentMoonAge >= 13.5 && currentMoonAge <= 16.5) moonPhaseStr = "満月";
-            else if (currentMoonAge > 16.5) moonPhaseStr = "下弦の月";
-            pushUpdateView('t-moon', `🌙 月齢<br>${currentMoonAge.toFixed(1)}日：${moonPhaseStr}`);
+            let y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
+            if (m < 3) { y--; m += 12; }
+            let jd = (365.25 * y) + (30.6 * (m + 1)) + d + 59.25;
+            let age = (jd - 11) % 29.53;
+            let phase = "上弦の月";
+            if (age < 2.5 || age > 27) phase = "新月";
+            else if (age >= 13.5 && age <= 16.5) phase = "満月";
+            else if (age > 16.5) phase = "下弦の月";
+            pushUpdateView('t-moon', `🌙 月齢<br>${age.toFixed(1)}日：${phase}`);
         }
 
-        function invokeOverpassQuery() {
-            const rangeOffset = 0.04;
-            const compiledQuery = `[out:json][timeout:15];(
-                node["amenity"="toilets"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["shop"="convenience"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["amenity"~"public_bath|spa"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["tourism"~"theme_park|zoo|museum|attraction"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["internet_access"="wlan"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["railway"="station"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["highway"="bus_stop"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["amenity"="fuel"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["amenity"="parking"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["highway"~"motorway_junction|motorway"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["charging_station"~".*|amenity=charging_station"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["amenity"="shelter"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
-                node["amenity"~"restaurant|cafe|fast_food"](${lat-rangeOffset},${lon-rangeOffset},${lat+rangeOffset},${lon+rangeOffset});
+        function executeOverpassExtraction() {
+            const offset = 0.035;
+            const query = `[out:json][timeout:15];(
+                node["amenity"="toilets"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["shop"="convenience"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["amenity"~"public_bath|spa"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["tourism"~"theme_park|zoo|museum|attraction"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["internet_access"="wlan"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["railway"="station"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["highway"="bus_stop"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["amenity"="fuel"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["amenity"="parking"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["highway"~"motorway_junction|motorway"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["amenity"="shelter"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["amenity"~"restaurant|cafe|fast_food"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
             );out body;`;
 
-            fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(compiledQuery)}`)
-            .then(res => res.json()).then(data => {
-                const nodes = data.elements || [];
-                const clusterMap = (filterFn) => {
-                    return nodes.filter(filterFn).map(i => {
-                        let m = calcDistanceAndBearing(lat, lon, i.lat, i.lon);
-                        return { title: i.tags.name || i.tags.operator || "周辺施設", distanceNum: parseFloat(m.distance), angleDegree: m.bearing };
-                    }).sort((a, b) => a.distanceNum - b.distanceNum);
+            fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+            .then(r => r.json()).then(res => {
+                const nodes = res.elements || [];
+                const extract = (filter) => {
+                    return nodes.filter(filter).map(n => {
+                        let m = calculateMetrics(lat, lon, n.lat, n.lon);
+                        return { title: n.tags.name || n.tags.operator || "周辺施設", dNum: parseFloat(m.dist), angle: m.bearing };
+                    }).sort((a, b) => a.dNum - b.dNum);
                 };
 
-                const datasetWC = clusterMap(e => e.tags.amenity === "toilets");
-                const datasetCV = clusterMap(e => e.tags.shop === "convenience");
-                const datasetSPA = clusterMap(e => e.tags.amenity === "public_bath" || e.tags.amenity === "spa" || (e.tags.name && e.tags.name.includes("温泉")));
-                const datasetSPOT = clusterMap(e => e.tags.tourism);
-                const datasetWIFI = clusterMap(e => e.tags.internet_access === "wlan" || (e.tags.name && e.tags.name.toLowerCase().includes("wi-fi")));
-                const datasetST = clusterMap(e => e.tags.railway === "station");
-                const datasetBUS = clusterMap(e => e.tags.highway === "bus_stop");
-                const datasetGS = clusterMap(e => e.tags.amenity === "fuel");
-                const datasetPK = clusterMap(e => e.tags.amenity === "parking");
-                const datasetHIGH = clusterMap(e => e.tags.highway === "motorway_junction" || e.tags.highway === "motorway");
-                const datasetEV = clusterMap(e => e.tags.amenity === "charging_station" || e.tags.charging_station);
-                const datasetEM = clusterMap(e => e.tags.amenity === "shelter" || (e.tags.name && e.tags.name.includes("避難所")));
-                const datasetFD = clusterMap(e => e.tags.amenity === "restaurant" || e.tags.amenity === "cafe" || e.tags.amenity === "fast_food");
+                const wc = extract(e => e.tags.amenity === "toilets");
+                const cv = extract(e => e.tags.shop === "convenience");
+                const spa = extract(e => e.tags.amenity === "public_bath" || e.tags.amenity === "spa" || (e.tags.name && e.tags.name.includes("温泉")));
+                const spot = extract(e => e.tags.tourism);
+                const wifi = extract(e => e.tags.internet_access === "wlan" || (e.tags.name && e.tags.name.toLowerCase().includes("wi-fi")));
+                const st = extract(e => e.tags.railway === "station");
+                const bus = extract(e => e.tags.highway === "bus_stop");
+                const gs = extract(e => e.tags.amenity === "fuel");
+                const pk = extract(e => e.tags.amenity === "parking");
+                const high = extract(e => e.tags.highway === "motorway_junction" || e.tags.highway === "motorway");
+                const em = extract(e => e.tags.amenity === "shelter" || (e.tags.name && e.tags.name.includes("避難")));
+                const fd = extract(e => e.tags.amenity === "restaurant" || e.tags.amenity === "cafe");
 
-                pushUpdateView('t-wc1', `🚾トイレ1<br>${datasetWC[0] ? datasetWC[0].title+" "+datasetWC[0].distanceNum+"km"+resolveRelativeArrow(datasetWC[0].angleDegree) : "-"}`);
-                pushUpdateView('t-wc2', `🚾トイレ2<br>${datasetWC[1] ? datasetWC[1].title+" "+datasetWC[1].distanceNum+"km"+resolveRelativeArrow(datasetWC[1].angleDegree) : "-"}`);
-                pushUpdateView('t-cv1', `🏪コンビニ1<br>${datasetCV[0] ? datasetCV[0].title+" "+datasetCV[0].distanceNum+"km"+resolveRelativeArrow(datasetCV[0].angleDegree) : "-"}`);
-                pushUpdateView('t-cv2', `🏪コンビニ2<br>${datasetCV[1] ? datasetCV[1].title+" "+datasetCV[1].distanceNum+"km"+resolveRelativeArrow(datasetCV[1].angleDegree) : "-"}`);
-                pushUpdateView('t-spa1', `♨️温泉1<br>${datasetSPA[0] ? datasetSPA[0].title+" "+datasetSPA[0].distanceNum+"km"+resolveRelativeArrow(datasetSPA[0].angleDegree) : "-"}`);
-                pushUpdateView('t-spa2', `♨️温泉2<br>${datasetSPA[1] ? datasetSPA[1].title+" "+datasetSPA[1].distanceNum+"km"+resolveRelativeArrow(datasetSPA[1].angleDegree) : "-"}`);
-                pushUpdateView('t-spot1', `🎡観光地1<br>${datasetSPOT[0] ? datasetSPOT[0].title+" "+datasetSPOT[0].distanceNum+"km"+resolveRelativeArrow(datasetSPOT[0].angleDegree) : "-"}`);
-                pushUpdateView('t-spot2', `🎡観光地2<br>${datasetSPOT[1] ? datasetSPOT[1].title+" "+datasetSPOT[1].distanceNum+"km"+resolveRelativeArrow(datasetSPOT[1].angleDegree) : "-"}`);
-                pushUpdateView('t-wifi1', `📶無料Wi-Fi1<br>${datasetWIFI[0] ? datasetWIFI[0].title+"："+datasetWIFI[0].distanceNum+"km"+resolveRelativeArrow(datasetWIFI[0].angleDegree) : "-"}`);
-                pushUpdateView('t-wifi2', `📶無料Wi-Fi2<br>${datasetWIFI[1] ? datasetWIFI[1].title+"："+datasetWIFI[1].distanceNum+"km"+resolveRelativeArrow(datasetWIFI[1].angleDegree) : "-"}`);
-                pushUpdateView('t-st1', `🚃駅1<br>${datasetST[0] ? datasetST[0].title+" "+datasetST[0].distanceNum+"km"+resolveRelativeArrow(datasetST[0].angleDegree) : "-"}`);
-                pushUpdateView('t-st2', `🚃駅2<br>${datasetST[1] ? datasetST[1].title+" "+datasetST[1].distanceNum+"km"+resolveRelativeArrow(datasetST[1].angleDegree) : "-"}`);
+                pushUpdateView('t-wc1', `🚾トイレ1<br>${wc[0] ? wc[0].title+" "+wc[0].dNum+"km"+getRelativeArrow(wc[0].angle) : "-"}`);
+                pushUpdateView('t-wc2', `🚾トイレ2<br>${wc[1] ? wc[1].title+" "+wc[1].dNum+"km"+getRelativeArrow(wc[1].angle) : "-"}`);
+                pushUpdateView('t-cv1', `🏪コンビニ1<br>${cv[0] ? cv[0].title+" "+cv[0].dNum+"km"+getRelativeArrow(cv[0].angle) : "-"}`);
+                pushUpdateView('t-cv2', `🏪コンビニ2<br>${cv[1] ? cv[1].title+" "+cv[1].dNum+"km"+getRelativeArrow(cv[1].angle) : "-"}`);
+                pushUpdateView('t-spa1', `♨️温泉1<br>${spa[0] ? spa[0].title+" "+spa[0].dNum+"km"+getRelativeArrow(spa[0].angle) : "-"}`);
+                pushUpdateView('t-spa2', `♨️温泉2<br>${spa[1] ? spa[1].title+" "+spa[1].dNum+"km"+getRelativeArrow(spa[1].angle) : "-"}`);
+                pushUpdateView('t-spot1', `🎡観光地1<br>${spot[0] ? spot[0].title+" "+spot[0].dNum+"km"+getRelativeArrow(spot[0].angle) : "-"}`);
+                pushUpdateView('t-spot2', `🎡観光地2<br>${spot[1] ? spot[1].title+" "+spot[1].dNum+"km"+getRelativeArrow(spot[1].angle) : "-"}`);
+                pushUpdateView('t-wifi1', `📶無料Wi-Fi1<br>${wifi[0] ? wifi[0].title+"："+wifi[0].dNum+"km"+getRelativeArrow(wifi[0].angle) : "-"}`);
+                pushUpdateView('t-wifi2', `📶無料Wi-Fi2<br>${wifi[1] ? wifi[1].title+"："+wifi[1].dNum+"km"+getRelativeArrow(wifi[1].angle) : "-"}`);
+                pushUpdateView('t-st1', `🚃駅1<br>${st[0] ? st[0].title+" "+st[0].dNum+"km"+getRelativeArrow(st[0].angle) : "-"}`);
+                pushUpdateView('t-st2', `🚃駅2<br>${st[1] ? st[1].title+" "+st[1].dNum+"km"+getRelativeArrow(st[1].angle) : "-"}`);
                 
-                pushUpdateView('t-bus1', `🚌バス情報1<br>${datasetBUS[0] ? "路線バス："+datasetBUS[0].title+"("+datasetBUS[0].distanceNum+"km"+resolveRelativeArrow(datasetBUS[0].angleDegree)+") 次のバス 10分後" : "-"}`);
-                pushUpdateView('t-bus2', `🚌バス情報2<br>${datasetBUS[1] ? "路線バス："+datasetBUS[1].title+"("+datasetBUS[1].distanceNum+"km"+resolveRelativeArrow(datasetBUS[1].angleDegree)+") 次のバス 25分後" : "-"}`);
+                pushUpdateView('t-bus1', `🚌バス情報1<br>${bus[0] ? "路線バス："+bus[0].title+"("+bus[0].dNum+"km"+getRelativeArrow(bus[0].angle)+") 次のバス 11:45" : "-"}`);
+                pushUpdateView('t-bus2', `🚌バス情報2<br>${bus[1] ? "路線バス："+bus[1].title+"("+bus[1].dNum+"km"+getRelativeArrow(bus[1].angle)+") 次のバス 12:10" : "-"}`);
                 
-                pushUpdateView('t-gs1', `⛽ガソリン1<br>${datasetGS[0] ? datasetGS[0].title+" "+datasetGS[0].distanceNum+"km"+resolveRelativeArrow(datasetGS[0].angleDegree) : "-"}`);
-                pushUpdateView('t-gs2', `⛽ガソリン2<br>${datasetGS[1] ? datasetGS[1].title+" "+datasetGS[1].distanceNum+"km"+resolveRelativeArrow(datasetGS[1].angleDegree) : "-"}`);
-                pushUpdateView('t-pk1', `🅿️駐車場1<br>${datasetPK[0] ? datasetPK[0].title+" "+datasetPK[0].distanceNum+"km"+resolveRelativeArrow(datasetPK[0].angleDegree) : "-"}`);
-                pushUpdateView('t-pk2', `🅿️駐車場2<br>${datasetPK[1] ? datasetPK[1].title+" "+datasetPK[1].distanceNum+"km"+resolveRelativeArrow(datasetPK[1].angleDegree) : "-"}`);
+                pushUpdateView('t-gs1', `⛽ガソリン1<br>${gs[0] ? gs[0].title+" "+gs[0].dNum+"km"+getRelativeArrow(gs[0].angle) : "-"}`);
+                pushUpdateView('t-gs2', `⛽ガソリン2<br>${gs[1] ? gs[1].title+" "+gs[1].dNum+"km"+getRelativeArrow(gs[1].angle) : "-"}`);
+                pushUpdateView('t-pk1', `🅿️駐車場1<br>${pk[0] ? pk[0].title+" "+pk[0].dNum+"km"+getRelativeArrow(pk[0].angle) : "-"}`);
+                pushUpdateView('t-pk2', `🅿️駐車場2<br>${pk[1] ? pk[1].title+" "+pk[1].dNum+"km"+getRelativeArrow(pk[1].angle) : "-"}`);
                 
-                pushUpdateView('t-hi1', `🛣️高速道路情報1<br>${datasetHIGH[0] ? "高速道路："+datasetHIGH[0].title+" "+datasetHIGH[0].distanceNum+"km" : "-"}`);
-                pushUpdateView('t-hi2', `🛣️高速道路情報2<br>${datasetHIGH[1] ? "高速道路："+datasetHIGH[1].title+" "+datasetHIGH[1].distanceNum+"km" : "-"}`);
+                pushUpdateView('t-hi1', `🛣️高速道路情報1<br>${high[0] ? "高速IC："+high[0].title+" "+high[0].dNum+"km" : "-"}`);
+                pushUpdateView('t-hi2', `🛣️高速道路情報2<br>${high[1] ? "高速IC："+high[1].title+" "+high[1].dNum+"km" : "-"}`);
                 
-                pushUpdateView('t-ev1', `🔋電気自動車充電1<br>${datasetEV[0] ? "急速充電あり："+datasetEV[0].distanceNum+"km "+resolveRelativeArrow(datasetEV[0].angleDegree) : "-"}`);
-                pushUpdateView('t-ev2', `🔋電気自動車充電2<br>${datasetEV[1] ? "急速充電あり："+datasetEV[1].distanceNum+"km "+resolveRelativeArrow(datasetEV[1].angleDegree) : "-"}`);
-                pushUpdateView('t-em1', `⛺️災害時避難所1<br>${datasetEM[0] ? datasetEM[0].title+"："+datasetEM[0].distanceNum+"km"+resolveRelativeArrow(datasetEM[0].angleDegree) : "-"}`);
-                pushUpdateView('t-em2', `⛺️災害時避難所2<br>${datasetEM[1] ? datasetEM[1].title+"："+datasetEM[1].distanceNum+"km"+resolveRelativeArrow(datasetEM[1].angleDegree) : "-"}`);
+                pushUpdateView('t-em1', `⛺️災害時避難所1<br>${em[0] ? em[0].title+"："+em[0].dNum+"km"+getRelativeArrow(em[0].angle) : "-"}`);
+                pushUpdateView('t-em2', `⛺️災害時避難所2<br>${em[1] ? em[1].title+"："+em[1].dNum+"km"+getRelativeArrow(em[1].angle) : "-"}`);
+                pushUpdateView('t-fd1', `🍜グルメ情報1<br>${fd[0] ? fd[0].title+"：★4.4 / "+fd[0].dNum+"km"+getRelativeArrow(fd[0].angle) : "-"}`);
+                pushUpdateView('t-fd2', `🍜グルメ情報2<br>${fd[1] ? fd[1].title+"：★4.1 / "+fd[1].dNum+"km"+getRelativeArrow(fd[1].angle) : "-"}`);
 
-                pushUpdateView('t-fd1', `🍜グルメ情報1<br>${datasetFD[0] ? datasetFD[0].title+"：★4.2 / "+datasetFD[0].distanceNum+"km"+resolveRelativeArrow(datasetFD[0].angleDegree) : "-"}`);
-                pushUpdateView('t-fd2', `🍜グルメ情報2<br>${datasetFD[1] ? datasetFD[1].title+"：★4.0 / "+datasetFD[1].distanceNum+"km"+resolveRelativeArrow(datasetFD[1].angleDegree) : "-"}`);
-                pushUpdateView('t-train1', `🚞鉄道情報1<br>${datasetST[0] ? datasetST[0].title+"線：平常運転 0分" : "-"}`);
-                pushUpdateView('t-train2', `🚞鉄道情報2<br>${datasetST[1] ? datasetST[1].title+"線:平常運転 0分" : "-"}`);
+                pushUpdateView('t-train1', `🚞鉄道情報1<br>${st[0] ? st[0].title+"線：平常運行 0分" : "-"}`);
+                pushUpdateView('t-train2', `🚞鉄道情報2<br>${st[1] ? st[1].title+"線：平常運行 0分" : "-"}`);
             }).catch(() => {
-                const faultKeys = ['t-wc1','t-wc2','t-cv1','t-cv2','t-spa1','t-spa2','t-spot1','t-spot2','t-wifi1','t-wifi2','t-st1','t-st2','t-bus1','t-bus2','t-gs1','t-gs2','t-pk1','t-pk2','t-hi1','t-hi2','t-ev1','t-ev2','t-em1','t-em2','t-fd1','t-fd2','t-train1','t-train2'];
-                faultKeys.forEach(key => pushUpdateView(key, '-'));
+                const fails = ['t-wc1','t-wc2','t-cv1','t-cv2','t-spa1','t-spa2','t-spot1','t-spot2','t-wifi1','t-wifi2','t-st1','t-st2','t-bus1','t-bus2','t-gs1','t-gs2','t-pk1','t-pk2','t-hi1','t-hi2','t-em1','t-em2','t-fd1','t-fd2','t-train1','t-train2'];
+                fails.forEach(k => pushUpdateView(k, '-'));
             });
-        }
-
-        function invokeWikipediaQuery() {
-            fetch(`https://ja.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=geosearch&gscoord=${lat}|${lon}&gsradius=10000&gslimit=2`)
-            .then(res => res.json()).then(data => {
-                let geoPages = data.query.geosearch;
-                if(geoPages && geoPages.length > 0) {
-                    geoPages.forEach((page, index) => {
-                        let idNum = index + 1;
-                        let metrics = calcDistanceAndBearing(lat, lon, page.lat, page.lon);
-                        fetch(`https://ja.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&pageids=${page.pageid}&exintro=1&explaintext=1&exchars=45`)
-                        .then(r2 => r2.json()).then(data2 => {
-                            let textSnippet = data2.query.pages[page.pageid].extract || "史跡の周辺解説データはありません。";
-                            pushUpdateView(`t-his${idNum}`, `🏯史跡${idNum}<br>${page.title}：${(metrics.distance * 1000).toFixed(0)}m${resolveRelativeArrow(metrics.bearing)}：${textSnippet}`);
-                        });
-                    });
-                } else { pushUpdateView('t-his1', '-'); pushUpdateView('t-his2', '-'); }
-            }).catch(() => { pushUpdateView('t-his1', '-'); pushUpdateView('t-his2', '-'); });
         }
     </script>
 </body>
