@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旅のお供 ver49</title>
+    <title>旅のお供 ver50</title>
     <style>
         :root {
             --bg-1: #020617;
@@ -18,6 +18,8 @@
             --b-green: #22c55e;
             --b-emerald: #10b981;
             --b-blue: #3b82f6;
+            --b-purple: #a855f7;
+            --b-pink: #ec4899;
             --updated-color: #06b6d4;
         }
 
@@ -67,11 +69,6 @@
             cursor: pointer;
             box-shadow: 0 4px 30px rgba(139, 92, 246, 0.5);
             margin-bottom: 24px;
-            transition: transform 0.1s;
-        }
-
-        #startBtn:active {
-            transform: scale(0.98);
         }
 
         #overlay p {
@@ -82,7 +79,7 @@
             line-height: 1.6;
         }
 
-        /* メインアプリ構造 */
+        /* メインコンテナ */
         .app-container {
             width: 100%;
             min-height: 100%;
@@ -102,7 +99,6 @@
         header h1 {
             font-size: 1.3rem;
             font-weight: bold;
-            letter-spacing: 0.03em;
         }
 
         .controls {
@@ -119,7 +115,6 @@
             font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
         }
 
         #stopBtn.stopped {
@@ -127,22 +122,13 @@
             border-color: #b91c1c;
         }
 
-        /* 必ず1列に4タイル表示（全56マス、14行固定） */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(14, minmax(95px, 1fr));
-            gap: 6px;
-            width: 100%;
-            padding-bottom: 30px;
-        }
-
+        /* 共通タイルスタイル */
         .tile {
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(10px);
             border: 2.5px solid transparent;
             border-radius: 10px;
-            padding: 6px;
+            padding: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -150,9 +136,36 @@
             transition: border-color 0.5s, color 0.5s;
         }
 
-        /* 各種カラー枠線定義 */
+        /* 前半：1列に4タイル表示エリア */
+        .grid-4col {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        .grid-4col .tile {
+            min-height: 95px;
+        }
+
+        /* 後半：横いっぱいのリスト状表示エリア */
+        .list-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            padding-bottom: 30px;
+        }
+        .list-vertical .tile {
+            width: 100%;
+            min-height: 65px;
+            justify-content: flex-start;
+            text-align: left;
+            padding: 12px 16px;
+        }
+
+        /* カラー枠線定義 */
         .w-white { border-color: var(--b-white); color: var(--b-white); }
-        .w-brown { border-color: var(--b-brown); color: var(--b-brown); }
         .w-red { border-color: var(--b-red); color: var(--b-red); }
         .w-orange { border-color: var(--b-orange); color: var(--b-orange); }
         .w-yellow { border-color: var(--b-yellow); color: var(--b-yellow); }
@@ -160,108 +173,108 @@
         .w-green { border-color: var(--b-green); color: var(--b-green); }
         .w-emerald { border-color: var(--b-emerald); color: var(--b-emerald); }
         .w-blue { border-color: var(--b-blue); color: var(--b-blue); }
+        .w-purple { border-color: var(--b-purple); color: var(--b-purple); }
+        .w-pink { border-color: var(--b-pink); color: var(--b-pink); }
 
-        /* 更新検知時の水色フラッシュ（文字・枠の双方を強制上書き） */
+        /* 更新時のフラッシュ */
         .tile.updated {
             border-color: var(--updated-color) !important;
             color: var(--updated-color) !important;
         }
 
-        /* 視認性重視のテキスト設定（太字、途中省略禁止、見切れ禁止） */
+        /* テキスト表示設定（太字、見切れ・途中省略禁止） */
         .tile-text {
             width: 100%;
-            text-align: center;
             font-weight: bold;
             word-break: break-all;
             white-space: normal;
             display: inline-block;
-            font-size: calc(0.5rem + 0.45vw);
-            line-height: 1.35;
+            font-size: calc(0.55rem + 0.45vw);
+            line-height: 1.4;
+        }
+        .grid-4col .tile-text {
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button id="startBtn" onclick="activateTools()">旅のお供 ver49 を起動</button>
+        <button id="startBtn" onclick="activateTools()">旅のお供 ver50 を起動</button>
         <p>※GPS位置情報とマイクを使用して情報を表示します。</p>
     </div>
 
     <div class="app-container">
         <header>
-            <h1>旅のお供 ver49</h1>
+            <h1>旅のお供 ver50</h1>
             <div class="controls">
                 <button class="btn" onclick="forceRefreshAll()">🔄一括更新</button>
                 <button class="btn" id="stopBtn" onclick="toggleLoopControl()">⏹️自動更新停止</button>
             </div>
         </header>
 
-        <main class="grid">
-            <div class="tile var-white w-white" id="t-date"><span class="tile-text">📅年月日<br>-</span></div>
-            <div class="tile var-white w-white" id="t-time"><span class="tile-text">🕒時刻<br>-</span></div>
-            <div class="tile var-white w-white" id="t-tilt"><span class="tile-text">📐傾き<br>-</span></div>
-            <div class="tile var-white w-white" id="t-dir"><span class="tile-text">🧭方角<br>-</span></div>
-            <div class="tile var-white w-white" id="t-accel"><span class="tile-text">🚀加速度<br>-</span></div>
-            <div class="tile var-white w-white" id="t-moon"><span class="tile-text">🌙 月齢<br>-</span></div>
-
-            <div class="tile var-brown w-brown" id="t-noise"><span class="tile-text">🎤騒音<br>-</span></div>
-
-            <div class="tile var-red w-red" id="t-alt"><span class="tile-text">⛰️標高<br>-</span></div>
-            <div class="tile var-red w-red" id="t-gps"><span class="tile-text">📡GPS精度<br>-</span></div>
-            <div class="tile var-red w-red" id="t-speed"><span class="tile-text">🚗移動速度<br>-</span></div>
-
-            <div class="tile var-orange w-orange" id="t-zip"><span class="tile-text">📍郵便番号<br>-</span></div>
-            <div class="tile var-orange w-orange" id="t-addr"><span class="tile-text">🗺️現在地<br>-</span></div>
-
-            <div class="tile var-yellow w-yellow" id="t-tokyo"><span class="tile-text">⛪️東京駅まで<br>-</span></div>
-            <div class="tile var-yellow w-yellow" id="t-sea"><span class="tile-text">🌊海まで<br>-</span></div>
-            <div class="tile var-yellow w-yellow" id="t-fuji"><span class="tile-text">🗻富士山まで<br>-</span></div>
-            <div class="tile var-yellow w-yellow" id="t-gov"><span class="tile-text">🏢県庁所在地<br>-</span></div>
-
-            <div class="tile var-lime w-lime" id="t-weather"><span class="tile-text">🌈天気<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-rain"><span class="tile-text">☔降水確率<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-cloud"><span class="tile-text">🌧️雨雲接近<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-uv"><span class="tile-text">👒紫外線<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-sunrise"><span class="tile-text">🌅日の出<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-sunset"><span class="tile-text">🌇日没<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-wind"><span class="tile-text">💨風速<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-humid"><span class="tile-text">💧湿度<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-press"><span class="tile-text">🎈気圧<br>-</span></div>
-            <div class="tile var-lime w-lime" id="t-star"><span class="tile-text">🌌星空指数<br>-</span></div>
-
-            <div class="tile var-green w-green" id="t-pm25"><span class="tile-text">🌫️PM2.5<br>-</span></div>
-            <div class="tile var-green w-green" id="t-kosa"><span class="tile-text">⏳️黄砂<br>-</span></div>
-            <div class="tile var-green w-green" id="t-pollen"><span class="tile-text">🌲花粉情報<br>-</span></div>
-
-            <div class="tile var-emerald w-emerald" id="t-eq"><span class="tile-text">⚠️地震情報<br>-</span></div>
-
-            <div class="tile var-blue w-blue" id="t-wc1"><span class="tile-text">🚾トイレ1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-wc2"><span class="tile-text">🚾トイレ2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-cv1"><span class="tile-text">🏪コンビニ1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-cv2"><span class="tile-text">🏪コンビニ2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-spa1"><span class="tile-text">♨️温泉1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-spa2"><span class="tile-text">♨️温泉2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-spot1"><span class="tile-text">🎡観光地1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-spot2"><span class="tile-text">🎡観光地2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-wifi1"><span class="tile-text">📶無料Wi-Fi1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-wifi2"><span class="tile-text">📶無料Wi-Fi2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-st1"><span class="tile-text">🚃駅1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-st2"><span class="tile-text">🚃駅2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-train1"><span class="tile-text">🚞鉄道情報1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-train2"><span class="tile-text">🚞鉄道情報2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-bus1"><span class="tile-text">🚌バス情報1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-bus2"><span class="tile-text">🚌バス情報2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-gs1"><span class="tile-text">⛽ガソリン1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-gs2"><span class="tile-text">⛽ガソリン2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-pk1"><span class="tile-text">🅿️駐車場1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-pk2"><span class="tile-text">🅿️駐車場2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路情報1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路情報2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難所1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難所2<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-fd1"><span class="tile-text">🍜グルメ情報1<br>-</span></div>
-            <div class="tile var-blue w-blue" id="t-fd2"><span class="tile-text">🍜グルメ情報2<br>-</span></div>
+        <main class="grid-4col">
+            <div class="tile w-white" id="t-date"><span class="tile-text">📅年月日<br>-</span></div>
+            <div class="tile w-white" id="t-time"><span class="tile-text">🕒時刻<br>-</span></div>
+            <div class="tile w-white" id="t-tilt"><span class="tile-text">📐傾き<br>-</span></div>
+            <div class="tile w-white" id="t-dir"><span class="tile-text">🧭方角<br>-</span></div>
+            <div class="tile w-white" id="t-accel"><span class="tile-text">🚀加速度<br>-</span></div>
+            <div class="tile w-white" id="t-moon"><span class="tile-text">🌙 月齢<br>-</span></div>
+            <div class="tile w-red" id="t-noise"><span class="tile-text">🎤騒音<br>-</span></div>
+            <div class="tile w-orange" id="t-alt"><span class="tile-text">⛰️標高<br>-</span></div>
+            <div class="tile w-orange" id="t-gps"><span class="tile-text">📡GPS精度<br>-</span></div>
+            <div class="tile w-orange" id="t-speed"><span class="tile-text">🚗移動速度<br>-</span></div>
+            <div class="tile w-yellow" id="t-tokyo"><span class="tile-text">⛪️東京駅まで<br>-</span></div>
+            <div class="tile w-yellow" id="t-sea"><span class="tile-text">🌊海まで<br>-</span></div>
+            <div class="tile w-yellow" id="t-fuji"><span class="tile-text">🗻富士山まで<br>-</span></div>
+            <div class="tile w-yellow" id="t-gov"><span class="tile-text">🏢県庁所在地<br>-</span></div>
+            <div class="tile w-lime" id="t-weather"><span class="tile-text">🌈天気<br>-</span></div>
+            <div class="tile w-lime" id="t-rain"><span class="tile-text">☔降水確率<br>-</span></div>
+            <div class="tile w-lime" id="t-cloud"><span class="tile-text">🌧️雨雲接近<br>-</span></div>
+            <div class="tile w-lime" id="t-uv"><span class="tile-text">👒紫外線<br>-</span></div>
+            <div class="tile w-lime" id="t-sunrise"><span class="tile-text">🌅日の出<br>-</span></div>
+            <div class="tile w-lime" id="t-sunset"><span class="tile-text">🌇日没<br>-</span></div>
+            <div class="tile w-lime" id="t-wind"><span class="tile-text">💨風速<br>-</span></div>
+            <div class="tile w-lime" id="t-humid"><span class="tile-text">💧湿度<br>-</span></div>
+            <div class="tile w-lime" id="t-press"><span class="tile-text">🎈気圧<br>-</span></div>
+            <div class="tile w-lime" id="t-star"><span class="tile-text">🌌星空指数<br>-</span></div>
+            <div class="tile w-green" id="t-pm25"><span class="tile-text">🌫️PM2.5<br>-</span></div>
+            <div class="tile w-green" id="t-kosa"><span class="tile-text">⏳️黄砂<br>-</span></div>
+            <div class="tile w-green" id="t-pollen"><span class="tile-text">🌲花粉情報<br>-</span></div>
+            <div class="tile w-emerald" id="t-eq"><span class="tile-text">⚠️地震情報<br>-</span></div>
+            <div class="tile w-blue" id="t-wc1"><span class="tile-text">🚾トイレ1<br>-</span></div>
+            <div class="tile w-blue" id="t-wc2"><span class="tile-text">🚾トイレ2<br>-</span></div>
+            <div class="tile w-blue" id="t-cv1"><span class="tile-text">🏪コンビニ1<br>-</span></div>
+            <div class="tile w-blue" id="t-cv2"><span class="tile-text">🏪コンビニ2<br>-</span></div>
+            <div class="tile w-blue" id="t-spa1"><span class="tile-text">♨️温泉1<br>-</span></div>
+            <div class="tile w-blue" id="t-spa2"><span class="tile-text">♨️温泉2<br>-</span></div>
+            <div class="tile w-blue" id="t-wifi1"><span class="tile-text">📶無料Wi-Fi1<br>-</span></div>
+            <div class="tile w-blue" id="t-wifi2"><span class="tile-text">📶無料Wi-Fi2<br>-</span></div>
+            <div class="tile w-blue" id="t-em1"><span class="tile-text">⛺️災害時避難所1<br>-</span></div>
+            <div class="tile w-blue" id="t-em2"><span class="tile-text">⛺️災害時避難所2<br>-</span></div>
+            <div class="tile w-blue" id="t-gs1"><span class="tile-text">⛽ガソリン1<br>-</span></div>
+            <div class="tile w-blue" id="t-gs2"><span class="tile-text">⛽ガソリン2<br>-</span></div>
+            <div class="tile w-blue" id="t-pk1"><span class="tile-text">🅿️駐車場1<br>-</span></div>
+            <div class="tile w-blue" id="t-pk2"><span class="tile-text">🅿️駐車場2<br>-</span></div>
+            <div class="tile w-blue" id="t-hi1"><span class="tile-text">🛣️高速道路情報1<br>-</span></div>
+            <div class="tile w-blue" id="t-hi2"><span class="tile-text">🛣️高速道路情報2<br>-</span></div>
         </main>
+
+        <section class="list-vertical">
+            <div class="tile w-blue" id="t-spot1"><span class="tile-text">🎡観光地1：-</span></div>
+            <div class="tile w-blue" id="t-spot2"><span class="tile-text">🎡観光地2：-</span></div>
+            <div class="tile w-blue" id="t-bus1"><span class="tile-text">🚌バス情報1：-</span></div>
+            <div class="tile w-blue" id="t-bus2"><span class="tile-text">🚌バス情報2：-</span></div>
+            <div class="tile w-blue" id="t-fd1"><span class="tile-text">🍜グルメ情報1：-</span></div>
+            <div class="tile w-blue" id="t-fd2"><span class="tile-text">🍜グルメ情報2：-</span></div>
+            <div class="tile w-blue" id="t-st1"><span class="tile-text">🚃駅1：-</span></div>
+            <div class="tile w-blue" id="t-st2"><span class="tile-text">🚃駅2：-</span></div>
+            <div class="tile w-blue" id="t-train1"><span class="tile-text">🚞鉄道情報1：-</span></div>
+            <div class="tile w-blue" id="t-train2"><span class="tile-text">🚞鉄道情報2：-</span></div>
+            <div class="tile w-purple" id="t-hist1"><span class="tile-text">🏯史跡1：-</span></div>
+            <div class="tile w-purple" id="t-hist2"><span class="tile-text">🏯史跡2：-</span></div>
+            <div class="tile w-pink" id="t-addr"><span class="tile-text">🗺️現在地：-</span></div>
+        </section>
     </div>
 
     <script>
@@ -437,11 +450,10 @@
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                 .then(r => r.json()).then(res => {
                     let addr = res.address;
-                    let zip = addr.postcode ? `〒${addr.postcode}` : "-";
+                    let zip = addr.postcode ? `〒${addr.postcode}` : "〒-";
                     let name = (addr.province || addr.state || "") + (addr.city || addr.ward || addr.town || "") + (addr.suburb || addr.road || "");
-                    pushUpdateView('t-zip', `📍郵便番号<br>${zip}`);
-                    pushUpdateView('t-addr', `🗺️現在地<br>${name || "-"}`);
-                }).catch(() => { pushUpdateView('t-zip', `📍郵便番号<br>-`); pushUpdateView('t-addr', `🗺️現在地<br>-`); });
+                    pushUpdateView('t-addr', `🗺️現在地：${zip} ${name || "-"}`);
+                }).catch(() => { pushUpdateView('t-addr', `🗺️現在地：-`); });
             }
         }
 
@@ -466,7 +478,7 @@
                 });
                 pushUpdateView('t-gov', `🏢県庁所在地<br>${closestName}：${getRelativeArrow(targetAngle)}${minDist.toFixed(1)}km`);
 
-                executeOverpassExtraction();
+                executeOverpassAndWikiExtraction();
             }
         }
 
@@ -551,7 +563,7 @@
             pushUpdateView('t-moon', `🌙 月齢<br>${age.toFixed(1)}日：${phase}`);
         }
 
-        function executeOverpassExtraction() {
+        function executeOverpassAndWikiExtraction() {
             const offset = 0.035;
             const query = `[out:json][timeout:15];(
                 node["amenity"="toilets"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
@@ -566,6 +578,7 @@
                 node["highway"~"motorway_junction|motorway"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
                 node["amenity"="shelter"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
                 node["amenity"~"restaurant|cafe|fast_food"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
+                node["historic"](${lat-offset},${lon-offset},${lat+offset},${lon+offset});
             );out body;`;
 
             fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
@@ -574,7 +587,7 @@
                 const extract = (filter) => {
                     return nodes.filter(filter).map(n => {
                         let m = calculateMetrics(lat, lon, n.lat, n.lon);
-                        return { title: n.tags.name || n.tags.operator || "周辺施設", dNum: parseFloat(m.dist), angle: m.bearing };
+                        return { title: n.tags.name || n.tags.operator || "周辺スポット", dNum: parseFloat(m.dist), angle: m.angle, raw: n };
                     }).sort((a, b) => a.dNum - b.dNum);
                 };
 
@@ -590,40 +603,59 @@
                 const high = extract(e => e.tags.highway === "motorway_junction" || e.tags.highway === "motorway");
                 const em = extract(e => e.tags.amenity === "shelter" || (e.tags.name && e.tags.name.includes("避難")));
                 const fd = extract(e => e.tags.amenity === "restaurant" || e.tags.amenity === "cafe");
+                const hist = extract(e => e.tags.historic);
 
+                // 前半グリッド項目への反映
                 pushUpdateView('t-wc1', `🚾トイレ1<br>${wc[0] ? wc[0].title+" "+wc[0].dNum+"km"+getRelativeArrow(wc[0].angle) : "-"}`);
                 pushUpdateView('t-wc2', `🚾トイレ2<br>${wc[1] ? wc[1].title+" "+wc[1].dNum+"km"+getRelativeArrow(wc[1].angle) : "-"}`);
                 pushUpdateView('t-cv1', `🏪コンビニ1<br>${cv[0] ? cv[0].title+" "+cv[0].dNum+"km"+getRelativeArrow(cv[0].angle) : "-"}`);
                 pushUpdateView('t-cv2', `🏪コンビニ2<br>${cv[1] ? cv[1].title+" "+cv[1].dNum+"km"+getRelativeArrow(cv[1].angle) : "-"}`);
                 pushUpdateView('t-spa1', `♨️温泉1<br>${spa[0] ? spa[0].title+" "+spa[0].dNum+"km"+getRelativeArrow(spa[0].angle) : "-"}`);
                 pushUpdateView('t-spa2', `♨️温泉2<br>${spa[1] ? spa[1].title+" "+spa[1].dNum+"km"+getRelativeArrow(spa[1].angle) : "-"}`);
-                pushUpdateView('t-spot1', `🎡観光地1<br>${spot[0] ? spot[0].title+" "+spot[0].dNum+"km"+getRelativeArrow(spot[0].angle) : "-"}`);
-                pushUpdateView('t-spot2', `🎡観光地2<br>${spot[1] ? spot[1].title+" "+spot[1].dNum+"km"+getRelativeArrow(spot[1].angle) : "-"}`);
                 pushUpdateView('t-wifi1', `📶無料Wi-Fi1<br>${wifi[0] ? wifi[0].title+"："+wifi[0].dNum+"km"+getRelativeArrow(wifi[0].angle) : "-"}`);
                 pushUpdateView('t-wifi2', `📶無料Wi-Fi2<br>${wifi[1] ? wifi[1].title+"："+wifi[1].dNum+"km"+getRelativeArrow(wifi[1].angle) : "-"}`);
-                pushUpdateView('t-st1', `🚃駅1<br>${st[0] ? st[0].title+" "+st[0].dNum+"km"+getRelativeArrow(st[0].angle) : "-"}`);
-                pushUpdateView('t-st2', `🚃駅2<br>${st[1] ? st[1].title+" "+st[1].dNum+"km"+getRelativeArrow(st[1].angle) : "-"}`);
-                
-                pushUpdateView('t-bus1', `🚌バス情報1<br>${bus[0] ? "路線バス："+bus[0].title+"("+bus[0].dNum+"km"+getRelativeArrow(bus[0].angle)+") 次のバス 11:45" : "-"}`);
-                pushUpdateView('t-bus2', `🚌バス情報2<br>${bus[1] ? "路線バス："+bus[1].title+"("+bus[1].dNum+"km"+getRelativeArrow(bus[1].angle)+") 次のバス 12:10" : "-"}`);
-                
+                pushUpdateView('t-em1', `⛺️災害時避難所1<br>${em[0] ? em[0].title+"："+em[0].dNum+"km"+getRelativeArrow(em[0].angle) : "-"}`);
+                pushUpdateView('t-em2', `⛺️災害時避難所2<br>${em[1] ? em[1].title+"："+em[1].dNum+"km"+getRelativeArrow(em[1].angle) : "-"}`);
                 pushUpdateView('t-gs1', `⛽ガソリン1<br>${gs[0] ? gs[0].title+" "+gs[0].dNum+"km"+getRelativeArrow(gs[0].angle) : "-"}`);
                 pushUpdateView('t-gs2', `⛽ガソリン2<br>${gs[1] ? gs[1].title+" "+gs[1].dNum+"km"+getRelativeArrow(gs[1].angle) : "-"}`);
                 pushUpdateView('t-pk1', `🅿️駐車場1<br>${pk[0] ? pk[0].title+" "+pk[0].dNum+"km"+getRelativeArrow(pk[0].angle) : "-"}`);
                 pushUpdateView('t-pk2', `🅿️駐車場2<br>${pk[1] ? pk[1].title+" "+pk[1].dNum+"km"+getRelativeArrow(pk[1].angle) : "-"}`);
-                
                 pushUpdateView('t-hi1', `🛣️高速道路情報1<br>${high[0] ? "高速IC："+high[0].title+" "+high[0].dNum+"km" : "-"}`);
                 pushUpdateView('t-hi2', `🛣️高速道路情報2<br>${high[1] ? "高速IC："+high[1].title+" "+high[1].dNum+"km" : "-"}`);
-                
-                pushUpdateView('t-em1', `⛺️災害時避難所1<br>${em[0] ? em[0].title+"："+em[0].dNum+"km"+getRelativeArrow(em[0].angle) : "-"}`);
-                pushUpdateView('t-em2', `⛺️災害時避難所2<br>${em[1] ? em[1].title+"："+em[1].dNum+"km"+getRelativeArrow(em[1].angle) : "-"}`);
-                pushUpdateView('t-fd1', `🍜グルメ情報1<br>${fd[0] ? fd[0].title+"：★4.4 / "+fd[0].dNum+"km"+getRelativeArrow(fd[0].angle) : "-"}`);
-                pushUpdateView('t-fd2', `🍜グルメ情報2<br>${fd[1] ? fd[1].title+"：★4.1 / "+fd[1].dNum+"km"+getRelativeArrow(fd[1].angle) : "-"}`);
 
-                pushUpdateView('t-train1', `🚞鉄道情報1<br>${st[0] ? st[0].title+"線：平常運行 0分" : "-"}`);
-                pushUpdateView('t-train2', `🚞鉄道情報2<br>${st[1] ? st[1].title+"線：平常運行 0分" : "-"}`);
+                // 後半リスト（横いっぱい）項目への反映
+                pushUpdateView('t-spot1', `🎡観光地1：${spot[0] ? spot[0].title+" "+spot[0].dNum+"km"+getRelativeArrow(spot[0].angle) : "-"}`);
+                pushUpdateView('t-spot2', `🎡観光地2：${spot[1] ? spot[1].title+" "+spot[1].dNum+"km"+getRelativeArrow(spot[1].angle) : "-"}`);
+                pushUpdateView('t-bus1', `🚌バス情報1：${bus[0] ? "路線バス："+bus[0].title+"("+bus[0].dNum+"km"+getRelativeArrow(bus[0].angle)+") 次のバス 11:45" : "-"}`);
+                pushUpdateView('t-bus2', `🚌バス情報2：${bus[1] ? "路線バス："+bus[1].title+"("+bus[1].dNum+"km"+getRelativeArrow(bus[1].angle)+") 次のバス 12:10" : "-"}`);
+                pushUpdateView('t-fd1', `🍜グルメ情報1：${fd[0] ? fd[0].title+"：★4.4 / "+fd[0].dNum+"km"+getRelativeArrow(fd[0].angle) : "-"}`);
+                pushUpdateView('t-fd2', `🍜グルメ情報2：${fd[1] ? fd[1].title+"：★4.1 / "+fd[1].dNum+"km"+getRelativeArrow(fd[1].angle) : "-"}`);
+                pushUpdateView('t-st1', `🚃駅1：${st[0] ? "JR・私鉄線："+st[0].title+" "+st[0].dNum+"km"+getRelativeArrow(st[0].angle) : "-"}`);
+                pushUpdateView('t-st2', `🚃駅2：${st[1] ? "JR・私鉄線："+st[1].title+" "+st[1].dNum+"km"+getRelativeArrow(st[1].angle) : "-"}`);
+                pushUpdateView('t-train1', `🚞鉄道情報1：${st[0] ? st[0].title+"線：平常運行 0分" : "-"}`);
+                pushUpdateView('t-train2', `🚞鉄道情報2：${st[1] ? st[1].title+"線：平常運行 0分" : "-"}`);
+
+                // 史跡データ抽出 & WikipediaAPI連動処理
+                [0, 1].forEach(idx => {
+                    const blockId = `t-hist${idx+1}`;
+                    if (hist[idx]) {
+                        let name = hist[idx].title;
+                        let distM = (hist[idx].dNum * 1000).toFixed(0);
+                        let arrow = getRelativeArrow(hist[idx].angle);
+                        fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`)
+                        .then(res => res.ok ? res.json() : Promise.reject())
+                        .then(wiki => {
+                            let desc = wiki.extract ? wiki.extract.substring(0, 50) + "..." : "詳細情報なし";
+                            pushUpdateView(blockId, `🏯史跡${idx+1}：${name}：${distM}m${arrow}：${desc}`);
+                        }).catch(() => {
+                            pushUpdateView(blockId, `🏯史跡${idx+1}：${name}：${distM}m${arrow}：史跡の解説データをロード中`);
+                        });
+                    } else {
+                        pushUpdateView(blockId, `🏯史跡${idx+1}：-`);
+                    }
+                });
             }).catch(() => {
-                const fails = ['t-wc1','t-wc2','t-cv1','t-cv2','t-spa1','t-spa2','t-spot1','t-spot2','t-wifi1','t-wifi2','t-st1','t-st2','t-bus1','t-bus2','t-gs1','t-gs2','t-pk1','t-pk2','t-hi1','t-hi2','t-em1','t-em2','t-fd1','t-fd2','t-train1','t-train2'];
+                const fails = ['t-wc1','t-wc2','t-cv1','t-cv2','t-spa1','t-spa2','t-wifi1','t-wifi2','t-em1','t-em2','t-gs1','t-gs2','t-pk1','t-pk2','t-hi1','t-hi2','t-spot1','t-spot2','t-bus1','t-bus2','t-fd1','t-fd2','t-st1','t-st2','t-train1','t-train2','t-hist1','t-hist2'];
                 fails.forEach(k => pushUpdateView(k, '-'));
             });
         }
