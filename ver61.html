@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅のお供 ver61</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    margin: 0; padding: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #0000cd, #cc7a00, #4a0080, #0000cd);
+    background-size: 600% 600%;
+    animation: deepSkyTransition 40s ease infinite;
+    color: #ffffff; font-weight: bold; overflow-x: hidden;
+}
+@keyframes deepSkyTransition {
+    0% { background-position: 0% 50%; }
+    33% { background-position: 50% 50%; }
+    66% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+#overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #020111; z-index: 9999;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 20px; text-align: center;
+}
+#start-btn {
+    padding: 28px 56px; font-size: 34px; font-weight: bold;
+    color: white; background: linear-gradient(45deg, #e11d48, #2563eb);
+    border: none; border-radius: 16px; cursor: pointer;
+    box-shadow: 0 6px 25px rgba(37, 99, 235, 0.5);
+    margin-bottom: 20px;
+}
+#overlay-notice { font-size: 16px; color: #cbd5e1; font-weight: bold; }
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 4px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+h1 { font-size: 24px; margin: 0; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
+#sync-btn {
+    padding: 16px 32px; font-size: 22px; font-weight: bold;
+    background: rgba(0,0,0,0.4); border: 2px solid #fff;
+    color: #fff; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.grid-container {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px; width: 100%; margin-bottom: 18px;
+}
+.list-container {
+    display: flex; flex-direction: column;
+    gap: 6px; width: 100%;
+}
+.tile {
+    border: 1px solid; padding: 3px 6px; border-radius: 4px;
+    background: rgba(0,0,0,0.55); display: flex;
+    flex-direction: column; justify-content: center;
+    overflow: hidden; word-break: break-word;
+    overflow-wrap: anywhere;
+    transition: border-color 0.4s ease, background-color 0.4s ease;
+}
+.tile.w-white { border-color: #ffffff; }
+.tile.w-blue { border-color: #3b82f6; }
+.tile.w-yellow { border-color: #eab308; }
+.tile.w-green { border-color: #22c55e; }
+.tile.w-emerald { border-color: #10b981; }
+.tile.w-navy { border-color: #1e3a8a; }
+.tile.w-orange { border-color: #f97316; }
+.tile.w-red { border-color: #ef4444; }
+.tile.w-brown { border-color: #8b4513; }
+.tile.w-gold { border-color: #d97706; }
+.tile.w-purple { border-color: #a855f7; }
+.tile.w-grey { border-color: #9ca3af; }
+.tile.updated {
+    border-color: #fde047 !important;
+    background-color: rgba(253, 224, 71, 0.3) !important;
+}
+.tile.updated .tile-label,
+.tile.updated .tile-value { color: #fde047 !important; }
+.tile-label {
+    font-size: 10px; color: rgba(255,255,255,0.85);
+    margin-bottom: 1px; font-weight: normal; line-height: 1.2;
+}
+.tile-value {
+    font-size: 22px; color: #fff; font-weight: bold;
+    line-height: 1.15; display: block;
+}
+.tile-value.sub-val { font-size: 15px; margin-top: 1px; }
+.grid-container .tile { min-height: 52px; }
+.list-container .tile {
+    min-height: 44px; flex-direction: row;
+    justify-content: space-between; align-items: center;
+    padding: 4px 10px;
+}
+.list-container .tile .tile-label {
+    margin-bottom: 0; margin-right: 12px;
+    flex-shrink: 0; font-size: 12px;
+}
+.list-container .tile .tile-value {
+    font-size: 20px; text-align: right;
+}
+</style>
+</head>
+<body>
+<div id="overlay">
+    <button id="start-btn" onclick="startApp()">旅のお供 ver61 を起動</button>
+    <div id="overlay-notice">※GPS位置情報とマイクを使用して情報を表示します。</div>
+</div>
+<header>
+    <h1>旅のお供 ver61</h1>
+    <button id="sync-btn" onclick="triggerSync()">🔄一括更新</button>
+</header>
+<div class="grid-container" id="grid-box"></div>
+<div class="list-container" id="list-box"></div>
+<script>
+const gridItems = [
+{id:"date",label:"📅 年月日",color:"white",sub:true},
+{id:"time",label:"🕒 時刻",color:"white"},
+{id:"tilt",label:"📐 傾き",color:"white"},
+{id:"direction",label:"🧭 方角",color:"white"},
+{id:"accel",label:"🚀 加速度",color:"white"},
+{id:"gps",label:"📡 GPS精度",color:"white"},
+{id:"speed",label:"🚗 移動速度",color:"white"},
+{id:"noise",label:"🎤 騒音",color:"blue"},
+{id:"altitude",label:"⛰️ 標高",color:"blue"},
+{id:"tokyo",label:"⛪ 東京駅まで",color:"blue"},
+{id:"sea",label:"🌊 海まで",color:"blue"},
+{id:"fuji",label:"🗻 富士山まで",color:"blue"},
+{id:"pref",label:"🏢 県庁所在地",color:"blue",sub:true},
+{id:"weather",label:"🌈 天気",color:"yellow"},
+{id:"pop",label:"☔ 降水確率",color:"yellow",sub:true},
+{id:"clouds",label:"🌧️ 雨雲接近",color:"yellow"},
+{id:"uv",label:"👒 紫外線",color:"yellow",sub:true},
+{id:"sunrise",label:"🌅 日の出",color:"yellow"},
+{id:"sunset",label:"🌇 日没",color:"yellow"},
+{id:"wind",label:"💨 風速",color:"yellow",sub:true},
+{id:"humidity",label:"💧 湿度",color:"yellow"},
+{id:"pressure",label:"🎈 気圧",color:"yellow"},
+{id:"climate",label:"地域気象特性(月間平均)",color:"yellow"},
+{id:"lightning",label:"地域の雷発生頻度(年平均)",color:"yellow"},
+{id:"pm25",label:"🌫️ PM2.5",color:"green",sub:true},
+{id:"dust",label:"⏳ 黄砂",color:"green",sub:true},
+{id:"pollen",label:"🌲 花粉",color:"green",sub:true},
+{id:"pm10",label:"PM10",color:"green",sub:true},
+{id:"no2",label:"二酸化窒素NO₂",color:"green",sub:true},
+{id:"o3",label:"オゾンO₃",color:"green",sub:true},
+{id:"co",label:"一酸化炭素CO",color:"green",sub:true},
+{id:"so2",label:"二酸化硫黄SO₂",color:"green",sub:true},
+{id:"bc",label:"ブラックカーボンBC",color:"green",sub:true},
+{id:"radiation",label:"自然由来の地質線量率",color:"green"},
+{id:"lightpoll",label:"光害指数",color:"green"},
+{id:"vegetation",label:"周辺の植生・山林情報",color:"green"},
+{id:"protected",label:"自然保護区・植生区分",color:"green"},
+{id:"seatemp",label:"🌊 海水温",color:"emerald"},
+{id:"wave",label:"🌊 波高・周期・方向",color:"emerald"},
+{id:"tidehigh",label:"🌊 満潮時間",color:"emerald"},
+{id:"tidelow",label:"🌊 干潮時間",color:"emerald"},
+{id:"moon",label:"🌙 月齢",color:"navy",sub:true},
+{id:"star",label:"🌌 星空指数",color:"navy",sub:true},
+{id:"satellite",label:"🛰️ 人工衛星",color:"navy"},
+{id:"sun",label:"🌞 太陽",color:"navy"},
+{id:"constellation",label:"⭐ 星座",color:"navy"},
+{id:"shooting",label:"🌠 流れ星",color:"navy"},
+{id:"aurora",label:"🌃 オーロラ指数",color:"navy",sub:true},
+{id:"solarflare",label:"☀️ 太陽フレア",color:"navy"},
+{id:"gst",label:"🌍 地磁気嵐",color:"navy"},
+{id:"sep",label:"⚡ 太陽高エネルギー粒子",color:"navy"},
+{id:"hss",label:"💨 高速太陽風",color:"navy"},
+{id:"ips",label:"💥 惑星間衝撃波",color:"navy"},
+{id:"rbe",label:"🔴 放射線帯強化",color:"navy"},
+{id:"asteroid",label:"☄️ 小惑星接近",color:"navy"},
+{id:"ufo",label:"🛸 UFO報告",color:"navy"},
+{id:"earthquake",label:"⚠️ 地震情報",color:"orange",sub:true},
+{id:"evac1",label:"⛺ 災害時避難1",color:"orange"},
+{id:"evac2",label:"⛺ 災害時避難2",color:"orange"},
+{id:"adsb",label:"✈️ 上空通過情報",color:"orange"},
+{id:"quakerisk",label:"📊 地震発生リスク",color:"orange"},
+{id:"aed",label:"🚑 AED",color:"orange"},
+{id:"rivername",label:"🏞️ 河川・水系",color:"orange"},
+{id:"riverlevel",label:"🌊 河川水位",color:"orange"},
+{id:"highway1",label:"🛣️ 交通密度1",color:"red"},
+{id:"highway2",label:"🛣️ 交通密度2",color:"red"},
+{id:"conv1",label:"🏪 コンビニ1",color:"brown"},
+{id:"conv2",label:"🏪 コンビニ2",color:"brown"},
+{id:"toilet1",label:"🚾 トイレ1",color:"brown"},
+{id:"toilet2",label:"🚾 トイレ2",color:"brown"},
+{id:"wifi1",label:"📶 Wi-Fi1",color:"brown"},
+{id:"wifi2",label:"📶 Wi-Fi2",color:"brown"},
+{id:"spa1",label:"♨️ 温泉1",color:"brown"},
+{id:"spa2",label:"♨️ 温泉2",color:"brown"},
+{id:"gas1",label:"⛽ ガソリン1",color:"brown"},
+{id:"gas2",label:"⛽ ガソリン2",color:"brown"},
+{id:"park1",label:"🅿️ 駐車場1",color:"brown"},
+{id:"park2",label:"🅿️ 駐車場2",color:"brown"},
+{id:"michi1",label:"🏡 道の駅1",color:"brown"},
+{id:"michi2",label:"🏡 道の駅2",color:"brown"},
+{id:"power",label:"⚡ 電力使用量",color:"brown"},
+{id:"hotel",label:"🏨 ホテル",color:"brown"},
+{id:"guest",label:"🏠 ゲストハウス",color:"brown"},
+{id:"building1",label:"🏢 建物1",color:"brown"},
+{id:"building2",label:"🏢 建物2",color:"brown"},
+{id:"vending",label:"🥤 自販機",color:"brown"},
+{id:"gasprice",label:"💰 ガソリン価格",color:"brown"},
+{id:"fx",label:"💱 為替 USD/JPY",color:"gold"},
+{id:"stockjp",label:"📈 日本株",color:"gold"},
+{id:"stockworld",label:"🌐 全世界株",color:"gold"},
+{id:"stockus",label:"🇺🇸 米国株",color:"gold"},
+{id:"gold",label:"🥇 純金1g",color:"gold"},
+{id:"land",label:"🏠 公示地価",color:"gold"}
+];
+
+const listItems = [
+{id:"station1",label:"🚃 駅1",color:"red"},
+{id:"station2",label:"🚃 駅2",color:"red"},
+{id:"train1",label:"🚞 鉄道情報1",color:"red"},
+{id:"train2",label:"🚞 鉄道情報2",color:"red"},
+{id:"bus1",label:"🚌 バス情報1",color:"red"},
+{id:"bus2",label:"🚌 バス情報2",color:"red"},
+{id:"ship",label:"🚢 船情報",color:"red"},
+{id:"gourmet1",label:"🍜 グルメ1",color:"brown"},
+{id:"gourmet2",label:"🍜 グルメ2",color:"brown"},
+{id:"postal",label:"🗺️ 現在地",color:"blue"},
+{id:"timezone",label:"🕐 行政区画・TZ",color:"blue"},
+{id:"mountain",label:"⛰️ 山",color:"blue"},
+{id:"csc",label:"🌐 国・州・市",color:"blue"},
+{id:"sight1",label:"🎡 観光地1",color:"purple"},
+{id:"sight2",label:"🎡 観光地2",color:"purple"},
+{id:"history1",label:"🏯 史跡1",color:"purple"},
+{id:"history2",label:"🏯 史跡2",color:"purple"},
+{id:"historic",label:"🏛️ 歴史的建造物",color:"purple"},
+{id:"ruins",label:"🏺 遺跡",color:"purple"},
+{id:"oldname1",label:"📜 昔の地名1",color:"purple"},
+{id:"oldname2",label:"📜 昔の地名2",color:"purple"},
+{id:"oldname3",label:"📜 昔の地名3",color:"purple"},
+{id:"heritage",label:"🏛️ 文化財保護区",color:"purple"},
+{id:"art",label:"🎨 地域の文学・芸術",color:"purple"},
+{id:"scenic",label:"🖼️ 景観美観地区",color:"purple"},
+{id:"geology",label:"🪨 地質図",color:"purple"},
+{id:"railnet",label:"🚆 鉄道・軌道交通網",color:"purple"},
+{id:"liquefaction",label:"💧 液状化予測",color:"grey"},
+{id:"zoning",label:"🏗️ 用途地域・容積率",color:"grey"}
+];
+
+let lat=null, lon=null, heading=0, speedMs=0, alt=0, acc=0;
+let audioCtx=null, analyser=null;
+
+const gridBox=document.getElementById("grid-box");
+const listBox=document.getElementById("list-box");
+
+gridItems.forEach(it=>{
+  const d=document.createElement("div");
+  d.className="tile w-"+it.color;
+  d.id="t-"+it.id;
+  d.innerHTML=`<div class="tile-label">${it.label}</div><div class="tile-value" id="v-${it.id}">-</div>${it.sub?`<div class="tile-value sub-val" id="s-${it.id}">-</div>`:""}`;
+  gridBox.appendChild(d);
+});
+
+listItems.forEach(it=>{
+  const d=document.createElement("div");
+  d.className="tile w-"+it.color;
+  d.id="t-"+it.id;
+  d.innerHTML=`<div class="tile-label">${it.label}</div><div class="tile-value" id="v-${it.id}">-</div>`;
+  listBox.appendChild(d);
+});
+
+function setVal(id, main, sub){
+  const m=document.getElementById("v-"+id);
+  const s=document.getElementById("s-"+id);
+  const t=document.getElementById("t-"+id);
+  let changed=false;
+  if(m&&m.innerText!==String(main||"-")){m.innerText=main||"-";changed=true;}
+  if(s&&sub!==undefined&&s.innerText!==String(sub||"-")){s.innerText=sub||"-";changed=true;}
+  if(changed&&t){t.classList.add("updated");setTimeout(()=>t.classList.remove("updated"),1500);}
+}
+
+function arrowTo(targetLat,targetLon){
+  if(lat==null||lon==null)return "↓";
+  const lat1=lat*Math.PI/180, lon1=lon*Math.PI/180;
+  const lat2=targetLat*Math.PI/180, lon2=targetLon*Math.PI/180;
+  const dLon=lon2-lon1;
+  const y=Math.sin(dLon)*Math.cos(lat2);
+  const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+  let brng=Math.atan2(y,x)*180/Math.PI;
+  brng=(brng+360)%360;
+  const rel=(brng-heading+360)%360;
+  const arrows=["↓","↙","←","↖","↑","↗","→","↘"];
+  return arrows[Math.round(rel/45)%8];
+}
+
+function distKm(targetLat,targetLon){
+  if(lat==null||lon==null)return null;
+  const R=6371;
+  const dLat=(targetLat-lat)*Math.PI/180;
+  const dLon=(targetLon-lon)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(targetLat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return (R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
+}
+
+function dirName(deg){
+  const names=["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
+  return names[Math.round(deg/22.5)%16];
+}
+
+function dirArrow(deg){
+  const arr=["↓","↙","↙","←","←","↖","↖","↑","↑","↗","↗","→","→","↘","↘","↓"];
+  return arr[Math.round(deg/22.5)%16];
+}
+
+const SunCalc=(function(global){var SunCalc={};var PI=Math.PI,sin=Math.sin,cos=Math.cos,tan=Math.tan,asin=Math.asin,atan2=Math.atan2;var rad=PI/180,dayMs=1000*60*60*24,J1970=2440588,J2000=2451545;function toJulian(date){return date.valueOf()/dayMs-0.5+J1970}function toDays(date){return toJulian(date)-J2000}function rightAscension(l,b){return atan2(sin(l)*Math.cos(23.4397*rad)-Math.tan(b)*Math.sin(23.4397*rad),Math.cos(l))}function declination(l,b){return asin(Math.sin(b)*Math.cos(23.4397*rad)+Math.cos(b)*Math.sin(23.4397*rad)*Math.sin(l))}function azimuth(H,phi,dec){return atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi))}function altitude(H,phi,dec){return asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H))}function siderealTime(d,lw){return rad*(280.16+360.9856236*d)-lw}function solarMeanAnomaly(d){return rad*(357.5291+0.98560028*d)}function eclipticLongitude(M){var C=rad*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M));return M+C+rad*102.9372+Math.PI}function sunCoords(d){var M=solarMeanAnomaly(d),L=eclipticLongitude(M);return{dec:declination(L,0),ra:rightAscension(L,0)}}var times=[[-0.833,"sunrise","sunset"],[-0.3,"sunriseEnd","sunsetStart"],[-6,"dawn","dusk"],[-12,"nauticalDawn","nauticalDusk"],[-18,"nightEnd","night"],[6,"goldenHourEnd","goldenHour"]];function addHours(date,h){return new Date(date.valueOf()+h*dayMs/24)}function getSetJ(h,lw,phi,dec,n,M,L){var w=Math.sin(h)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi),a=Math.atan2(Math.sin(Math.acos(Math.abs(w)>1?NaN:Math.acos(w))),Math.cos(Math.acos(Math.abs(w)>1?NaN:Math.acos(w)))),Jset=J2000+n+0.0053*Math.sin(M)-0.0069*Math.sin(2*L)+a/(2*Math.PI);return Jset}function getTimes(date,lat,lng){var lw=rad*(-lng),phi=rad*lat,d=toDays(date),n=Math.round(d-0.0009-lw/(2*Math.PI)),Jstar=0.0009+lw/(2*Math.PI)+n,M=solarMeanAnomaly(Jstar),C=rad*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M)),Lsun=M+C+rad*102.9372+Math.PI,Jtransit=Jstar+0.0053*Math.sin(M)-0.0069*Math.sin(2*Lsun),result={};for(var i=0,len=times.length;i<len;i+=1){var time=times[i],Jset=getSetJ(rad*time[0],lw,phi,declination(Lsun,0),n,M,Lsun),Jrise=Jtransit-(Jset-Jtransit);if(!isNaN(Jrise)){result[time[1]]=addHours(date,(Jrise-J2000)*24);result[time[2]]=addHours(date,(Jset-J2000)*24)}}return result}function getPosition(date,lat,lng){var lw=rad*(-lng),phi=rad*lat,d=toDays(date),c=sunCoords(d),H=siderealTime(d,lw)-c.ra;return{azimuth:azimuth(H,phi,c.dec),altitude:altitude(H,phi,c.dec)}}SunCalc.getTimes=getTimes;SunCalc.getPosition=getPosition;if(typeof module!=="undefined"&&module.exports){module.exports=SunCalc}else{global.SunCalc=SunCalc}})(this);
+
+function sunAzimuth(lat,lon,isRise){
+  const date=new Date();
+  const times=SunCalc.getTimes(date,lat,lon);
+  const t=isRise?times.sunrise:times.sunset;
+  const pos=SunCalc.getPosition(t,lat,lon);
+  return ((pos.azimuth*180/Math.PI)+180)%360;
+}
+
+function weatherEmoji(code){
+  const map={0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌧️",53:"🌧️",55:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",71:"🌨️",73:"🌨️",75:"🌨️",80:"🌦️",81:"🌦️",82:"🌦️",95:"⛈️",96:"⛈️",99:"⛈️"};
+  return map[code]||"🌡️";
+}
+
+function level(v,med,high){if(v==null)return "-";if(v>high)return "非常に多い";if(v>med)return "多い";return "少ない";}
+
+function updateDate(){
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=String(now.getMonth()+1).padStart(2,"0");
+  const d=String(now.getDate()).padStart(2,"0");
+  const w=["(日)","(月)","(火)","(水)","(木)","(金)","(土)"][now.getDay()];
+  setVal("date",`${y}/${m}/${d}`,w);
+  setVal("time",`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`);
+}
+
+function initSensors(){
+  if(window.DeviceOrientationEvent){
+    window.addEventListener("deviceorientation",e=>{
+      if(e.beta!=null){
+        const tilt=Math.round(Math.abs(e.beta)+Math.abs(e.gamma||0));
+        setVal("tilt",tilt+"°");
+      }
+      let h=e.webkitCompassHeading||e.alpha;
+      if(h!=null&&h!==undefined){
+        heading=h;
+        setVal("direction",`${dirArrow(h)}${dirName(h)} ${Math.round(h)}°`);
+      }
+    },true);
+  }
+  if(window.DeviceMotionEvent){
+    window.addEventListener("devicemotion",e=>{
+      if(e.accelerationIncludingGravity){
+        const a=Math.sqrt(e.accelerationIncludingGravity.x**2+e.accelerationIncludingGravity.y**2+e.accelerationIncludingGravity.z**2);
+        setVal("accel",Math.round(a*3.6)+" km/h");
+      }
+    },true);
+  }
+}
+
+async function initAudio(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    analyser=audioCtx.createAnalyser();
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    analyser.fftSize=256;
+    const data=new Uint8Array(analyser.frequencyBinCount);
+    setInterval(()=>{
+      analyser.getByteFrequencyData(data);
+      let sum=0;for(let i=0;i<data.length;i++)sum+=data[i];
+      const db=Math.round((sum/data.length)+35);
+      const txt=db>70?"騒がしい":db>50?"普通":"静か";
+      setVal("noise",db+"dB："+txt);
+    },3000);
+  }catch(e){setVal("noise","-");}
+}
+
+function initGPS(){
+  if(!navigator.geolocation)return;
+  navigator.geolocation.watchPosition(pos=>{
+    lat=pos.coords.latitude;
+    lon=pos.coords.longitude;
+    speedMs=pos.coords.speed||0;
+    alt=pos.coords.altitude||0;
+    acc=pos.coords.accuracy;
+    setVal("gps",Math.round(acc)+"：高");
+    setVal("speed",Math.round(speedMs*3.6)+" km/h");
+    setVal("altitude",Math.round(alt)+"m");
+    setVal("tokyo",arrowTo(35.6812,139.7671)+" "+distKm(35.6812,139.7671)+"km");
+    setVal("fuji",arrowTo(35.3606,138.7274)+" "+distKm(35.3606,138.7274)+"km");
+    findPref();
+  },()=>{},{enableHighAccuracy:true,timeout:10000,maximumAge:5000});
+}
+
+async function fetchMeteo(){
+  if(!lat||!lon)return;
+  try{
+    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation_probability,precipitation,uv_index,relativehumidity_2m,pressure_msl,cloudcover,windspeed_10m,winddirection_10m&daily=sunrise,sunset&timezone=Asia%2FTokyo`).then(r=>r.json());
+    const a=await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm2_5,pm10,nitrogen_dioxide,ozone,carbon_monoxide,sulphur_dioxide,dust,alder_pollen,birch_pollen,grass_pollen&timezone=Asia%2FTokyo`).then(r=>r.json());
+    const m=await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_surface_temperature,wave_height,wave_period,wave_direction,swell_wave_height,wind_wave_height&timezone=Asia%2FTokyo`).then(r=>r.json()).catch(()=>null);
+    if(w.current_weather){
+      const cw=w.current_weather;
+      setVal("weather",weatherEmoji(cw.weathercode)+Math.round(cw.temperature)+"℃");
+      const h=w.hourly;
+      const idx=0;
+      setVal("pop",(h.precipitation_probability[idx]||0)+"%",(h.precipitation[idx]||0)+"mm");
+      const cc=h.cloudcover[idx]||0;
+      setVal("clouds",cc>60?"接近あり":"なし");
+      const uv=h.uv_index[idx]||0;
+      setVal("uv",uv>5?"強い":uv>2?"普通":"弱い","UV"+uv.toFixed(1));
+      setVal("humidity",(h.relativehumidity_2m[idx]||50)+"%");
+      setVal("pressure",Math.round(h.pressure_msl[idx]||1013)+"hPa");
+      setVal("wind",Math.round(cw.windspeed)+"m",dirName(cw.winddirection)+dirArrow(cw.winddirection));
+      setVal("sunrise",w.daily.sunrise[0].slice(11,16)+" "+dirArrow(sunAzimuth(lat,lon,true)));
+      setVal("sunset",w.daily.sunset[0].slice(11,16)+" "+dirArrow(sunAzimuth(lat,lon,false)));
+      setVal("star",(100-cc)+"%",cc<30?"絶好の天体観測日":"観測困難");
+    }
+    if(a.hourly){
+      const h=a.hourly;
+      const idx=0;
+      const pm25=h.pm2_5[idx]; setVal("pm25",level(pm25,20,35),pm25+"μg/m³");
+      const pm10=h.pm10[idx]; setVal("pm10",level(pm10,30,50),pm10+"µg/m³");
+      const dust=h.dust[idx]; setVal("dust",level(dust,10,20),dust+"μg/m³");
+      const pol=(h.alder_pollen[idx]||0)+(h.birch_pollen[idx]||0)+(h.grass_pollen[idx]||0);
+      setVal("pollen",level(pol,20,50),pol+"μg/m³");
+      setVal("no2",level(h.nitrogen_dioxide[idx],40,80),h.nitrogen_dioxide[idx]+"ppm");
+      setVal("o3",level(h.ozone[idx],60,100),h.ozone[idx]+"ppm");
+      setVal("co",level(h.carbon_monoxide[idx],4000,8000),h.carbon_monoxide[idx]+"ppm");
+      setVal("so2",level(h.sulphur_dioxide[idx],20,50),h.sulphur_dioxide[idx]+"ppm");
+      setVal("bc","-","-");
+    }
+    if(m&&m.hourly){
+      const h=m.hourly;
+      const idx=0;
+      setVal("seatemp",(h.sea_surface_temperature[idx]||"-")+"℃");
+      const wh=h.wave_height[idx]||"-";
+      const wp=h.wave_period[idx]||"-";
+      const wd=h.wave_direction[idx]||"-";
+      const sw=h.swell_wave_height[idx]||"-";
+      const ww=h.wind_wave_height[idx]||"-";
+      setVal("wave",`${wh}m ${wp}s ${dirName(wd)}${dirArrow(wd)} うねり${sw}m 風波${ww}m`);
+    }
+  }catch(e){}
+}
+
+const prefData=[
+{name:"北海道",lat:43.0618,lon:141.3545},{name:"青森県",lat:40.8224,lon:140.7474},{name:"岩手県",lat:39.702,lon:141.1545},
+{name:"宮城県",lat:38.2688,lon:140.872},{name:"秋田県",lat:39.7199,lon:140.1035},{name:"山形県",lat:38.2404,lon:140.3636},
+{name:"福島県",lat:37.7503,lon:140.4675},{name:"茨城県",lat:36.3418,lon:140.4468},{name:"栃木県",lat:36.5657,lon:139.8836},
+{name:"群馬県",lat:36.3912,lon:139.0607},{name:"埼玉県",lat:35.8617,lon:139.6455},{name:"千葉県",lat:35.6051,lon:140.1233},
+{name:"東京都",lat:35.6895,lon:139.6917},{name:"神奈川県",lat:35.4478,lon:139.6425},{name:"新潟県",lat:37.9162,lon:139.0364},
+{name:"富山県",lat:36.6953,lon:137.2113},{name:"石川県",lat:36.5947,lon:136.6256},{name:"福井県",lat:36.0652,lon:136.2216},
+{name:"山梨県",lat:35.665,lon:138.5688},{name:"長野県",lat:36.6485,lon:138.1942},{name:"岐阜県",lat:35.4233,lon:136.7607},
+{name:"静岡県",lat:34.9769,lon:138.3831},{name:"愛知県",lat:35.1802,lon:136.9066},{name:"三重県",lat:34.7303,lon:136.5086},
+{name:"滋賀県",lat:35.0045,lon:135.8688},{name:"京都府",lat:35.0116,lon:135.7681},{name:"大阪府",lat:34.6863,lon:135.52},
+{name:"兵庫県",lat:34.6913,lon:135.183},{name:"奈良県",lat:34.6851,lon:135.805},{name:"和歌山県",lat:34.226,lon:135.1675},
+{name:"鳥取県",lat:35.5039,lon:134.2377},{name:"島根県",lat:35.4723,lon:133.0505},{name:"岡山県",lat:34.6618,lon:133.9354},
+{name:"広島県",lat:34.3966,lon:132.4596},{name:"山口県",lat:34.1861,lon:131.4705},{name:"徳島県",lat:34.0657,lon:134.5593},
+{name:"香川県",lat:34.3401,lon:134.0434},{name:"愛媛県",lat:33.8416,lon:132.7657},{name:"高知県",lat:33.5597,lon:133.5311},
+{name:"福岡県",lat:33.6064,lon:130.4181},{name:"佐賀県",lat:33.2496,lon:130.2988},{name:"長崎県",lat:32.7503,lon:129.8677},
+{name:"熊本県",lat:32.7898,lon:130.7417},{name:"大分県",lat:33.2382,lon:131.6126},{name:"宮崎県",lat:31.9112,lon:131.4239},
+{name:"鹿児島県",lat:31.5602,lon:130.5581},{name:"沖縄県",lat:26.2123,lon:127.6792}
+];
+
+function findPref(){
+  if(!lat||!lon)return;
+  let best=null,bd=Infinity;
+  prefData.forEach(p=>{
+    const d=distKm(p.lat,p.lon);
+    if(d&&parseFloat(d)<bd){bd=parseFloat(d);best=p;}
+  });
+  if(best){
+    setVal("pref",best.name,arrowTo(best.lat,best.lon)+distKm(best.lat,best.lon)+"km");
+  }
+}
+
+function calcMoon(){
+  const now=new Date();
+  const synodic=29.53058867;
+  const known=new Date(2000,0,6,18,14,0);
+  const diff=(now-known)/86400000;
+  const age=diff%synodic;
+  const phase=age<1?"新月":age<7?"弦の月":age<14?"上弦":age<16?"満月":age<22?"下弦":age<28?"弦の月":"新月";
+  setVal("moon",phase,age.toFixed(1)+"日");
+}
+
+function calcTides(){
+  if(!lat||!lon)return;
+  const now=new Date();
+  const base=now.getTime();
+  const period=12.42*3600000;
+  const offset=((base/period)%1)*period;
+  const high=new Date(base-offset+period);
+  const low=new Date(base-offset+period/2);
+  setVal("tidehigh",String(high.getHours()).padStart(2,"0")+":"+String(high.getMinutes()).padStart(2,"0"));
+  setVal("tidelow",String(low.getHours()).padStart(2,"0")+":"+String(low.getMinutes()).padStart(2,"0"));
+}
+
+function calcSun(){
+  if(!lat||!lon)return;
+  const now=new Date();
+  const pos=SunCalc.getPosition(now,lat,lon);
+  const az=((pos.azimuth*180/Math.PI)+180)%360;
+  const al=pos.altitude*180/Math.PI;
+  setVal("sun",al>0?"🌞 太陽 "+dirArrow(az)+dirName(az):"🌙 太陽は地平線下");
+  const constellations=["おうし座","ふたご座","かに座","しし座","おとめ座","てんびん座","さそり座","いて座","やぎ座","みずがめ座","うお座","おひつじ座"];
+  const idx=Math.floor((now.getMonth()+1+(now.getDate()>15?1:0))/2)%12;
+  setVal("constellation",constellations[idx]+" "+dirArrow(az)+" 距離光年");
+}
+
+function calcStar(){
+  const now=new Date();
+  const m=now.getMonth()+1;
+  let meteors="";
+  if((m>=4&&m<=5)||(m>=8&&m<=8)||(m>=10&&m<=11)||(m>=12&&m<=1))meteors="流星群活発期";
+  setVal("shooting",meteors||"-");
+}
+
+async function fetchOverpass(){
+  if(!lat||!lon)return;
+  const q=`[out:json][timeout:25];(node["shop"="convenience"](around:3000,${lat},${lon});node["amenity"="toilets"](around:3000,${lat},${lon});node["amenity"="fuel"](around:5000,${lat},${lon});node["amenity"="parking"](around:3000,${lat},${lon});node["tourism"="hotel"](around:5000,${lat},${lon});node["tourism"="guest_house"](around:5000,${lat},${lon});node["amenity"="restaurant"](around:3000,${lat},${lon});node["amenity"="cafe"](around:3000,${lat},${lon});node["amenity"="vending_machine"](around:2000,${lat},${lon});node["amenity"="public_bath"](around:5000,${lat},${lon});node["amenity"="wifi"](around:3000,${lat},${lon});node["internet_access"="wlan"](around:3000,${lat},${lon});node["highway"="bus_stop"](around:3000,${lat},${lon});node["railway"="station"](around:5000,${lat},${lon});node["tourism"="viewpoint"](around:10000,${lat},${lon});node["historic"](around:10000,${lat},${lon});node["boundary"="protected_area"](around:10000,${lat},${lon});node["natural"="water"](around:5000,${lat},${lon});node["waterway"="river"](around:5000,${lat},${lon});node["emergency"="assembly_point"](around:10000,${lat},${lon});node["emergency"="aed"](around:5000,${lat},${lon});node["highway"="motorway"](around:10000,${lat},${lon});node["highway"="trunk"](around:10000,${lat},${lon});node["leisure"="park"](around:3000,${lat},${lon});node["natural"="peak"](around:10000,${lat},${lon});node["tourism"="attraction"](around:10000,${lat},${lon}););out body;way["natural"="coastline"](around:50000,${lat},${lon});out center;`;
+  try{
+    const res=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)});
+    const data=await res.json();
+    const els=data.elements||[];
+    const nodes=els.filter(e=>e.type==="node"&&e.tags);
+    const ways=els.filter(e=>e.type==="way"&&e.center);
+    const sort=a=>a.sort((x,y)=>{
+      const dx=distKm(x.lat,x.lon);const dy=distKm(y.lat,y.lon);
+      return (parseFloat(dx)||Infinity)-(parseFloat(dy)||Infinity);
+    });
+    const pick=(key,val,limit=2)=>sort(nodes.filter(e=>e.tags[key]&&e.tags[key].match(val))).slice(0,limit);
+    const fmt=e=>{
+      const d=distKm(e.lat,e.lon);const a=arrowTo(e.lat,e.lon);
+      return (e.tags.name||"-")+(d?" "+d+"km "+a:"");
+    };
+    const cvs=pick("shop","convenience");setVal("conv1",cvs[0]?fmt(cvs[0]):"-");setVal("conv2",cvs[1]?fmt(cvs[1]):"-");
+    const tlt=pick("amenity","toilets");setVal("toilet1",tlt[0]?fmt(tlt[0]):"-");setVal("toilet2",tlt[1]?fmt(tlt[1]):"-");
+    const spa=pick("amenity","public_bath");setVal("spa1",spa[0]?fmt(spa[0]):"-");setVal("spa2",spa[1]?fmt(spa[1]):"-");
+    const gas=pick("amenity","fuel");setVal("gas1",gas[0]?fmt(gas[0]):"-");setVal("gas2",gas[1]?fmt(gas[1]):"-");
+    const prk=pick("amenity","parking");setVal("park1",prk[0]?fmt(prk[0]):"-");setVal("park2",prk[1]?fmt(prk[1]):"-");
+    const htl=pick("tourism","hotel");setVal("hotel",htl[0]?fmt(htl[0]):"-");
+    const gst=pick("tourism","guest_house");setVal("guest",gst[0]?fmt(gst[0]):"-");
+    const vnd=pick("amenity","vending_machine");setVal("vending",vnd[0]?fmt(vnd[0]):"-");
+    const rst=pick("amenity","restaurant");setVal("gourmet1",rst[0]?(rst[0].tags.name||"-")+" ★"+(rst[0].tags.rating||"-")+" / "+distKm(rst[0].lat,rst[0].lon)+"km "+arrowTo(rst[0].lat,rst[0].lon):"-");
+    const caf=pick("amenity","cafe");setVal("gourmet2",caf[0]?(caf[0].tags.name||"-")+" ★"+(caf[0].tags.rating||"-")+" / "+distKm(caf[0].lat,caf[0].lon)+"km "+arrowTo(caf[0].lat,caf[0].lon):"-");
+    const bus=pick("highway","bus_stop");setVal("bus1",bus[0]?(bus[0].tags.name||"-")+" "+distKm(bus[0].lat,bus[0].lon)+"km "+arrowTo(bus[0].lat,bus[0].lon)+" 次-":"-");setVal("bus2",bus[1]?(bus[1].tags.name||"-")+" "+distKm(bus[1].lat,bus[1].lon)+"km "+arrowTo(bus[1].lat,bus[1].lon)+" 次-":"-");
+    const st=pick("railway","station");setVal("station1",st[0]?(st[0].tags.name||"-")+"駅 "+distKm(st[0].lat,st[0].lon)+"km "+arrowTo(st[0].lat,st[0].lon):"-");setVal("station2",st[1]?(st[1].tags.name||"-")+"駅 "+distKm(st[1].lat,st[1].lon)+"km "+arrowTo(st[1].lat,st[1].lon):"-");
+    const vw=pick("tourism","viewpoint");setVal("sight1",vw[0]?fmt(vw[0]):"-");setVal("sight2",vw[1]?fmt(vw[1]):"-");
+    const his=pick("historic","");setVal("history1",his[0]?fmt(his[0]):"-");setVal("history2",his[1]?fmt(his[1]):"-");
+    const pa=pick("boundary","protected_area");setVal("protected",pa[0]?fmt(pa[0]):"-");
+    const pk=pick("leisure","park");setVal("vegetation",pk[0]?fmt(pk[0]):"-");
+    const mt=pick("natural","peak");setVal("mountain",mt[0]?(mt[0].tags.name||"-")+" "+(mt[0].tags.ele||"-")+"m "+distKm(mt[0].lat,mt[0].lon)+"km":mt[0]?(mt[0].tags.name||"-")+" "+distKm(mt[0].lat,mt[0].lon)+"km":"-");
+    const riv=pick("waterway","river");setVal("rivername",riv[0]?(riv[0].tags.name||"-")+" "+distKm(riv[0].lat,riv[0].lon)+"km":"-");
+    const aed=pick("emergency","aed");setVal("aed",aed[0]?fmt(aed[0]):"-");
+    const eva=pick("emergency","assembly_point");setVal("evac1",eva[0]?fmt(eva[0]):"-");setVal("evac2",eva[1]?fmt(eva[1]):"-");
+    const mwy=pick("highway","motorway|trunk");setVal("highway1",mwy[0]?(mwy[0].tags.name||mwy[0].tags.ref||"道路")+" - "+distKm(mwy[0].lat,mwy[0].lon)+"km":"-");setVal("highway2",mwy[1]?(mwy[1].tags.name||mwy[1].tags.ref||"道路")+" - "+distKm(mwy[1].lat,mwy[1].lon)+"km":"-");
+    const wifiNodes=nodes.filter(e=>(e.tags.amenity==="wifi")||(e.tags.internet_access==="wlan")).sort((a,b)=>{
+      const da=distKm(a.lat,a.lon);const db=distKm(b.lat,b.lon);
+      return (parseFloat(da)||Infinity)-(parseFloat(db)||Infinity);
+    });
+    setVal("wifi1",wifiNodes[0]?fmt(wifiNodes[0]):"-");setVal("wifi2",wifiNodes[1]?fmt(wifiNodes[1]):"-");
+    const coast=ways.filter(e=>e.tags&&e.tags.natural==="coastline").sort((a,b)=>{
+      const da=distKm(a.center.lat,a.center.lon);const db=distKm(b.center.lat,b.center.lon);
+      return (parseFloat(da)||Infinity)-(parseFloat(db)||Infinity);
+    });
+    if(coast.length>0){
+      setVal("sea",arrowTo(coast[0].center.lat,coast[0].center.lon)+" "+distKm(coast[0].center.lat,coast[0].center.lon)+"km");
+    }else{setVal("sea","-");}
+  }catch(e){}
+}
+
+async function fetchNominatim(){
+  if(!lat||!lon)return;
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=ja`);
+    const d=await r.json();
+    if(d.address){
+      const a=d.address;
+      const pc=a.postcode||"-";
+      const p=a.province||a.state||a.region||"-";
+      const c=a.city||a.town||a.village||a.county||"-";
+      const s=a.suburb||a.district||"";
+      const full=`${p}${c}${s}`;
+      setVal("postal",`〒${pc} ${full}`);
+      setVal("timezone",`${full} / Asia/Tokyo`);
+      setVal("csc",`${a.country||"-"}, ${p}, ${c}`);
+    }
+  }catch(e){}
+}
+
+async function fetchP2PQuake(){
+  try{
+    const r=await fetch("https://api.p2pquake.net/v2/history?codes=551&limit=1");
+    const d=await r.json();
+    if(d&&d[0]){
+      const q=d[0];
+      const time=q.time?new Date(q.time).toLocaleString("ja-JP",{hour:"2-digit",minute:"2-digit"}):"-";
+      setVal("earthquake",`${q.earthquake?.hypocenter?.name||"-"}`,`M${q.earthquake?.hypocenter?.magnitude||"-"} 震度${q.earthquake?.maxScale?Math.round(q.earthquake.maxScale/10):"-"}：${time}`);
+    }
+  }catch(e){setVal("earthquake","-","-");}
+}
+
+async function fetchNASA(){
+  try{
+    const now=new Date().toISOString().split("T")[0];
+    const flr=await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(flr&&flr.length>0){setVal("solarflare",flr[0].classType||"-");}else{setVal("solarflare","-");}
+    const gst=await fetch(`https://api.nasa.gov/DONKI/GST?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(gst&&gst.length>0){setVal("gst",gst[0].allKpIndex?gst[0].allKpIndex[0]?.observedTime?"発生中":"-":"-");}else{setVal("gst","-");}
+    const sep=await fetch(`https://api.nasa.gov/DONKI/SEP?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(sep&&sep.length>0){setVal("sep","検出あり");}else{setVal("sep","-");}
+    const hss=await fetch(`https://api.nasa.gov/DONKI/HSS?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(hss&&hss.length>0){setVal("hss","検出あり");}else{setVal("hss","-");}
+    const ips=await fetch(`https://api.nasa.gov/DONKI/IPS?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(ips&&ips.length>0){setVal("ips","検出あり");}else{setVal("ips","-");}
+    const rbe=await fetch(`https://api.nasa.gov/DONKI/RBE?startDate=${now}&endDate=${now}&api_key=DEMO_KEY`).then(r=>r.json()).catch(()=>null);
+    if(rbe&&rbe.length>0){setVal("rbe","検出あり");}else{setVal("rbe","-");}
+  }catch(e){}
+}
+
+async function fetchAurora(){
+  try{
+    const r=await fetch("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json");
+    const d=await r.json();
+    if(d&&d.length>1){
+      const kp=parseFloat(d[1][1]);
+      const loc=kp>7?"北極圏・北欧":kp>5?"高緯度地方":kp>4?"中緯度":kp>3?"低緯度":"観測不可";
+      setVal("aurora",kp.toFixed(1),loc);
+    }
+  }catch(e){setVal("aurora","-","-");}
+}
+
+async function fetchAsteroid(){
+  try{
+    const today=new Date().toISOString().split("T")[0];
+    const r=await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`);
+    const d=await r.json();
+    const near=d.near_earth_objects;
+    const list=near[today];
+    if(list&&list.length>0){
+      const a=list[0];
+      const size=(a.estimated_diameter?.meters?.estimated_diameter_max||"-");
+      const dist=(a.close_approach_data[0]?.miss_distance?.kilometers||"-");
+      setVal("asteroid",(typeof size==="number"?size.toFixed(1):size)+"m",(typeof dist==="number"?parseFloat(dist).toFixed(0):dist)+"km");
+    }else{setVal("asteroid","-","-");}
+  }catch(e){setVal("asteroid","-","-");}
+}
+
+async function fetchSatellite(){
+  if(!lat||!lon)return;
+  try{
+    const r=await fetch(`https://api.n2yo.com/rest/v1/satellite/above/${lat}/${lon}/0/90/0/&apiKey=demo`);
+    const d=await r.json();
+    if(d&&d.above&&d.above.length>0){
+      const s=d.above[0];
+      setVal("satellite",s.satname+" "+s.intDesignator+" "+s.launchDate);
+    }else{setVal("satellite","-");}
+  }catch(e){setVal("satellite","-");}
+}
+
+async function fetchFx(){
+  try{
+    const r=await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+    const d=await r.json();
+    if(d&&d.rates&&d.rates.JPY){
+      setVal("fx",d.rates.JPY.toFixed(2)+"円");
+    }else{setVal("fx","-");}
+  }catch(e){setVal("fx","-");}
+}
+
+async function fetchStocks(){
+  try{
+    const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5EN225?interval=1d&range=1d");
+    const d=await r.json();
+    if(d.chart&&d.chart.result){
+      const meta=d.chart.result[0].meta;
+      setVal("stockjp",`日経平均 ${meta.regularMarketPrice?.toFixed(0)||"-"}円`);
+    }else{setVal("stockjp","-");}
+  }catch(e){setVal("stockjp","-");}
+  try{
+    const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=1d");
+    const d=await r.json();
+    if(d.chart&&d.chart.result){
+      const meta=d.chart.result[0].meta;
+      setVal("stockus",`S&P500 ${meta.regularMarketPrice?.toFixed(0)||"-"}pt`);
+    }else{setVal("stockus","-");}
+  }catch(e){setVal("stockus","-");}
+  try{
+    const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5EFTSE?interval=1d&range=1d");
+    const d=await r.json();
+    if(d.chart&&d.chart.result){
+      const meta=d.chart.result[0].meta;
+      setVal("stockworld",`FTSE ${meta.regularMarketPrice?.toFixed(0)||"-"}pt`);
+    }else{setVal("stockworld","-");}
+  }catch(e){setVal("stockworld","-");}
+}
+
+async function fetchGold(){
+  try{
+    const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d");
+    const d=await r.json();
+    if(d.chart&&d.chart.result){
+      const p=d.chart.result[0].meta.regularMarketPrice;
+      const jpy=p*150;
+      setVal("gold",Math.round(jpy/31.1035)+"円");
+    }else{setVal("gold","-");}
+  }catch(e){setVal("gold","-");}
+}
+
+async function fetchADSB(){
+  try{
+    const r=await fetch("https://opensky-network.org/api/states/all?lamin=20&lomin=120&lamax=46&lomax=150");
+    const d=await r.json();
+    if(d&&d.states){
+      const cnt=d.states.length;
+      setVal("adsb",cnt+"機 上空通過中");
+    }else{setVal("adsb","-");}
+  }catch(e){setVal("adsb","-");}
+}
+
+async function fetchMichi(){
+  if(!lat||!lon)return;
+  try{
+    const q=`[out:json][timeout:15];(node["amenity"="rest_area"]["name"~"道の駅"](around:15000,${lat},${lon});node["highway"="rest_area"]["name"~"道の駅"](around:15000,${lat},${lon}););out body;`;
+    const r=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)});
+    const d=await r.json();
+    const nodes=(d.elements||[]).filter(e=>e.type==="node"&&e.tags).sort((a,b)=>{
+      const da=distKm(a.lat,a.lon);const db=distKm(b.lat,b.lon);
+      return (parseFloat(da)||Infinity)-(parseFloat(db)||Infinity);
+    });
+    setVal("michi1",nodes[0]?(nodes[0].tags.name||"道の駅")+" "+distKm(nodes[0].lat,nodes[0].lon)+"km "+arrowTo(nodes[0].lat,nodes[0].lon):"-");
+    setVal("michi2",nodes[1]?(nodes[1].tags.name||"道の駅")+" "+distKm(nodes[1].lat,nodes[1].lon)+"km "+arrowTo(nodes[1].lat,nodes[1].lon):"-");
+  }catch(e){setVal("michi1","-");setVal("michi2","-");}
+}
+
+function runAll(){
+  if(!lat||!lon)return;
+  setVal("tokyo",arrowTo(35.6812,139.7671)+" "+distKm(35.6812,139.7671)+"km");
+  setVal("fuji",arrowTo(35.3606,138.7274)+" "+distKm(35.3606,138.7274)+"km");
+  findPref();
+  calcTides();
+  calcSun();
+  calcStar();
+  fetchOverpass();
+  fetchNominatim();
+  fetchP2PQuake();
+  fetchNASA();
+  fetchAurora();
+  fetchAsteroid();
+  fetchSatellite();
+  fetchFx();
+  fetchStocks();
+  fetchGold();
+  fetchADSB();
+  fetchMichi();
+  setVal("lightpoll","-");
+  setVal("radiation","-");
+  setVal("climate","-");
+  setVal("lightning","-");
+  setVal("quakerisk","-");
+  setVal("power","-");
+  setVal("gasprice","-");
+  setVal("land","-");
+  setVal("ufo","-");
+  setVal("ship","-");
+  setVal("train1","-");
+  setVal("train2","-");
+  setVal("historic","-");
+  setVal("ruins","-");
+  setVal("oldname1","-");
+  setVal("oldname2","-");
+  setVal("oldname3","-");
+  setVal("heritage","-");
+  setVal("art","-");
+  setVal("scenic","-");
+  setVal("geology","-");
+  setVal("railnet","-");
+  setVal("liquefaction","-");
+  setVal("zoning","-");
+  setVal("riverlevel","-");
+  setVal("building1","-");
+  setVal("building2","-");
+}
+
+function triggerSync(){
+  updateDate();
+  if(lat&&lon)runAll();
+  gridItems.concat(listItems).forEach(it=>{
+    const t=document.getElementById("t-"+it.id);
+    if(t){t.classList.add("updated");setTimeout(()=>t.classList.remove("updated"),1500);}
+  });
+}
+
+function startApp(){
+  document.getElementById("overlay").style.display="none";
+  updateDate();
+  initSensors();
+  initAudio();
+  initGPS();
+  setInterval(updateDate,1000);
+  setInterval(()=>{if(lat&&lon)fetchMeteo();},900000);
+  setInterval(()=>{if(lat&&lon)runAll();},600000);
+  setInterval(calcMoon,3600000);
+  const waitForGPS=setInterval(()=>{
+    if(lat&&lon){
+      fetchMeteo();
+      runAll();
+      clearInterval(waitForGPS);
+    }
+  },1000);
+}
+</script>
+</body>
+</html>
